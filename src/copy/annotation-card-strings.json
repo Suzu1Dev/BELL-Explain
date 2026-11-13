@@ -1,0 +1,34 @@
+{
+  "zh-TW": {
+    "cardLabel": "詞句解釋",
+    "closeCardAria": "關閉詞句解釋",
+    "analogyHeading": "換個說法",
+    "exampleHeading": "小例子",
+    "savedBadge": "已存入這篇筆記",
+    "removeAction": "移除",
+    "removeTermAria": "移除「{term}」的解釋",
+    "loadingMessage": "正在依這段內容準備白話解釋…",
+    "incompleteError": "回傳的解釋不完整，請重試。",
+    "explainFailedError": "無法產生解釋，請稍後重試。",
+    "streamInterruptedError": "解釋連線中斷，尚未確認是否儲存。請重新載入筆記後再試。",
+    "removeFailedError": "移除失敗，請重試。",
+    "retryExplainAction": "重新解釋",
+    "cancelAction": "取消"
+  },
+  "en": {
+    "cardLabel": "Explanation",
+    "closeCardAria": "Close explanation",
+    "analogyHeading": "In other words",
+    "exampleHeading": "Quick example",
+    "savedBadge": "Saved to this note",
+    "removeAction": "Remove",
+    "removeTermAria": "Remove explanation for “{term}”",
+    "loadingMessage": "Preparing a plain-language explanation for this passage…",
+    "incompleteError": "The explanation came back incomplete. Please try again.",
+    "explainFailedError": "Couldn't prepare an explanation. Please try again in a moment.",
+    "streamInterruptedError": "Connection lost before we could confirm it saved. Please reload this note before trying again.",
+    "removeFailedError": "Couldn't remove. Please try again.",
+    "retryExplainAction": "Try again",
+    "cancelAction": "Cancel"
+  }
+}

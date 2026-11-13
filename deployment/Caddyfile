@@ -1,0 +1,3 @@
+{$BELL_SYNC_DOMAIN} {
+  reverse_proxy sync:8080
+}

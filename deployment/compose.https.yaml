@@ -1,0 +1,20 @@
+# Add this override to compose.yaml when a public domain points to this host.
+services:
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      BELL_SYNC_DOMAIN: ${BELL_SYNC_DOMAIN:?Set BELL_SYNC_DOMAIN for automatic HTTPS}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - sync
+    restart: unless-stopped
+volumes:
+  caddy-data:
+  caddy-config:

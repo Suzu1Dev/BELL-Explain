@@ -1,0 +1,160 @@
+.suite-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.suite-sidebar-brand .brand-link { padding-left: 0; }
+.suite-sidebar-brand .brand { gap: 7px; font-size: 19px; letter-spacing: -1px; }
+.suite-sidebar-brand .brand-icon { width: 30px; height: 30px; }
+.sidebar-collapsed .suite-sidebar-brand { justify-content: center; }
+.sidebar-collapsed .suite-sidebar-brand .brand-link { display: none; }
+.review-state-error { border-color: var(--bell-danger); }
+.review-state-stale { border-style: dashed; }
+.nav-count-unknown { min-width: 22px; }
+.review-card-actions { display: flex; flex-wrap: wrap; gap: 16px; }
+.send-personal-button { white-space: nowrap; }
+.suite-draft-dialog { max-width: 580px; }
+
+html[data-theme="dark"] ::selection { background: #3b4b78; }
+html[data-theme="dark"] :is(.sidebar,.topbar,.composer,.composer-footer,.note-card,.reader-document,.reader-aside-sticky,.dialog,.generation-panel,.library-search,.global-search kbd,.empty-state,.review-card,.review-rating,.review-done-actions a,.review-done-actions button,.continue-card,.graph-explainer,.toast-action,.search-dialog-input,.workspace-settings-tabs,.settings-card,.settings-section,.model-settings-card,.sync-settings-card,.embedding-settings-card,.try-examples button,.icon-button,.secondary-button) {
+  background: var(--bell-surface);
+  border-color: var(--bell-border);
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.topbar) { background: rgb(24 30 41 / 88%); }
+html[data-theme="dark"] :is(.composer-footer,.reader-bottom-source,.code-header,.reader-tabs,.dialog-footer,.search-dialog-input,.review-context,.review-hints span,.review-answer .review-analogy,.input-meta,.topic-question,.repo-composer-options,.library-result-label,.summary-block,.analogy,.reading-annotation-hint,.example-status,.related-panel,.reading-tip,.source-info,.source-content,.self-check,.practical-example,.document-upload,.repository-workspace) {
+  background: var(--bell-surface-raised);
+  border-color: var(--bell-border);
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.nav-item.active,.composer-tabs button.selected,.filter-tabs button.active,.category-pill,.reading-outline button.active,.review-kind,.review-new,.tag,.tiny-badge,.nav-count,.sample-label,.predict-toggle.is-on) {
+  background: var(--bell-accent-soft);
+  color: var(--bell-accent);
+}
+html[data-theme="dark"] :is(.nav-item:hover:not(.active),.composer-tabs button:hover:not(.selected):not(:disabled),.reading-outline button:hover,.review-rating:hover:not(:disabled),.review-done-actions a:hover,.review-done-actions button:hover) {
+  background: var(--bell-surface-raised);
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.home-intro h1,.page-heading h1,.reader-heading h1,.explanation-heading h2,.review-prompt,.review-done h2,.empty-state h2,.empty-state h3,.note-card-body h3,.dialog-header h2,.source-info h3,.reader-document,.review-card,.review-answer,.self-check h2,.self-check h3,.practical-example h3,.repository-workspace h1,.repository-workspace h2,.repository-workspace h3,.graph-page h1) {
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.home-intro p,.page-heading p,.reader-heading>p,.explanation-text,.note-card-body>p,.note-card-body .card-eyebrow,.reader-eyebrow,.reader-tabs>span,.reader-bottom-source,.source-info p,.source-info a,.topbar-title b,.topbar-breadcrumb,.global-search,.connection-status,.nav-item,.category-nav button,.category-nav button>span,.nav-section-label,.grow-card p,.grow-card button,.profile-button small,.profile-button>svg,.library-search input,.library-result-label,.empty-state p,.loading-state,.composer-preferences select,.composer-preferences label,.depth-hint,.auto-save-hint,.input-area textarea,.input-meta,.topic-question,.review-count,.review-instruction,.review-source,.review-context,.review-hints span,.review-rating small,.review-done p,.review-open,.dialog-footer,.delete-content,.search-suggestions,.reader-aside-sticky,.reading-tip,.analogy p,.analogy b,.summary-block p,.summary-block b,.paragraph-concepts,.reader-follow,.reader-pdf-tabs,.reader-pane-switch) {
+  color: var(--bell-text-muted);
+}
+html[data-theme="dark"] :is(.eyebrow,.underlined-word,.text-button,.primary-button.generate-button,.review-open,.source-info a,.reader-tabs button.active,.reading-outline button.active,.explanation-heading button,.section-pages button,.category-pill,.review-kind,.graph-count,.grow-icon) {
+  color: var(--bell-accent);
+}
+html[data-theme="dark"] :is(.primary-button,.new-learning-button,.review-reveal) { color: #fff; }
+html[data-theme="dark"] :is(input,textarea,select) {
+  color: var(--bell-text);
+  border-color: var(--bell-border);
+}
+html[data-theme="dark"] :is(select,.topic-question,.repo-composer-options input,.dialog input,.dialog textarea,.dialog select) { background: var(--bell-surface); }
+html[data-theme="dark"] :is(input::placeholder,textarea::placeholder) { color: #8e99ae; opacity: 1; }
+html[data-theme="dark"] :is(.composer,.note-card,.reader-document,.reader-aside-sticky,.dialog,.generation-panel,.library-search,.review-card,.review-rating,.review-done,.continue-card,.code-block,.summary-block,.analogy,.reading-annotation-hint,.example-status,.reader-bottom-source,.reader-tabs button,.reader-pdf-pane,.reader-pdf-tabs,.reader-pane-switch,.source-content,.section-pages button,.related-panel,.self-check *,.practical-example *,.document-upload *,.repository-workspace *,.dialog *) {
+  border-color: var(--bell-border);
+}
+html[data-theme="dark"] :is(.code-block,.source-content .code-block pre,.source-content .code-line>span:last-child) {
+  background: var(--bell-code);
+  color: var(--bell-code-text);
+}
+html[data-theme="dark"] :is(.code-block pre,.code-block code,.source-content .code-line>span:last-child) { color: var(--bell-code-text); }
+html[data-theme="dark"] .code-header { background: #202838; }
+html[data-theme="dark"] .syntax-keyword { color: #c5a6ef; }
+html[data-theme="dark"] .syntax-string { color: #a8d5a2; }
+html[data-theme="dark"] .syntax-comment { color: #93a2b9; }
+html[data-theme="dark"] .syntax-number { color: #e7bd73; }
+html[data-theme="dark"] code.inline-code { background: #2a3344; color: #e3e9f5; }
+html[data-theme="dark"] .math-invalid { color: var(--bell-warning); }
+html[data-theme="dark"] .review-context { background: #202a3c; }
+html[data-theme="dark"] .review-answer .review-analogy { background: #302a20; color: #e2c998; }
+html[data-theme="dark"] .review-done { background: transparent; }
+html[data-theme="dark"] .review-progress,
+html[data-theme="dark"] .review-progress::-webkit-progress-bar { background: #303a4c; }
+html[data-theme="dark"] .review-progress::-webkit-progress-value { background: #829cff; }
+html[data-theme="dark"] .review-progress::-moz-progress-bar { background: #829cff; }
+html[data-theme="dark"] .generation-error,
+html[data-theme="dark"] .page-error { background: #342820; color: #efc287; border-color: #6d5130; }
+html[data-theme="dark"] .generation-error button,
+html[data-theme="dark"] .page-error button { color: #f4d49e; }
+html[data-theme="dark"] .toast { background: #e7ecf6; color: #1b2330; }
+html[data-theme="dark"] .dialog::backdrop { background: rgb(3 7 14 / 68%); }
+html[data-theme="dark"] .avatar,
+html[data-theme="dark"] .topbar-avatar { background: #383328; color: #dbc69d; }
+html[data-theme="dark"] .grow-card { background: linear-gradient(135deg,#202a40,#1b2433); }
+html[data-theme="dark"] .note-card-image { background: #202b40; }
+html[data-theme="dark"] .note-card-image .mini-tone-1 { background: #1d302b; }
+html[data-theme="dark"] .note-card-image .mini-tone-2 { background: #332a21; }
+html[data-theme="dark"] .intro-art { opacity: .72; }
+html[data-theme="dark"] .reader-follow input { accent-color: var(--blue); }
+html[data-theme="dark"] :is(.viz-card,.scene-card,.related-notes,.self-check-card,.practical-step,.ms-provider,.ms-speed,.bell-sync-section,.bell-sync-version,.semantic-search,.semantic-result,.reading-selection-toolbar,.reading-explanation-card,.sa-inspector,.sa-dialog,.rb-card,.rb-dialog,.repo-import,.repo-card,.repo-detail,.document-drop-icon) {
+  background: var(--bell-surface);
+  border-color: var(--bell-border);
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.viz-stage,.sa-stage,.sa-output,.ms-setup,.ms-summary,.self-check-yours,.self-check-reference,.practical-example,.practical-guess textarea,.document-dropzone,.document-locked,.document-question textarea,.document-range input,.document-chapter,.document-password input,.pdf-toolbar,.pdf-password input) {
+  background: var(--bell-surface-raised);
+  border-color: var(--bell-border);
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.self-check-card button:not(.self-check-primary),.sa-stage-tools>button,.sa-speed select,.sa-reveal,.bell-sync-button:not(.primary)) {
+  background: var(--bell-surface);
+  border-color: var(--bell-border);
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.viz-card,.scene-card,.related-notes,.self-check-card,.practical-example,.model-settings,.sync-settings,.embedding-settings,.semantic-search,.repository-workspace) :is(p,small,span,label,legend) {
+  color: var(--bell-text-muted);
+}
+html[data-theme="dark"] :is(.viz-title-row h3,.scene-card h3,.related-notes strong,.related-notes em,.self-check-card h4,.practical-step-content,.ms-intro h3,.ms-provider-top,.ms-speed b,.bell-sync-section-title h4,.semantic-heading strong,.semantic-result-title>button,.repo-page-heading h1,.repo-card strong,.repo-detail h2,.repo-detail h3) {
+  color: var(--bell-text);
+}
+html[data-theme="dark"] :is(.viz-stage,.sa-stage) { background: radial-gradient(ellipse at 50% 40%,#263047 0%,#181e29 75%); }
+html[data-theme="dark"] .viz-node-surface { fill: #202736; stroke: #53617a; }
+html[data-theme="dark"] .viz-node-active .viz-node-surface { fill: #334368; stroke: #91a8ff; }
+html[data-theme="dark"] :is(.viz-card,.scene-card) svg text { fill: var(--bell-text); }
+html[data-theme="dark"] :is(.ms-provider.ms-selected,.ms-speed.ms-speed-selected,.practical-step.selected) { background: var(--bell-accent-soft); border-color: var(--bell-accent); }
+html[data-theme="dark"] :is(.repo-import-row input,.repo-file-filter input,.repo-question textarea,.repo-management button,.repo-delete-confirm,.repo-delete-confirm button) { background: var(--bell-surface); color: var(--bell-text-muted); border-color: var(--bell-border); }
+html[data-theme="dark"] :is(.ms-save,.knowledge-primary,.self-check-primary,.bell-sync-button.primary) { color: #fff; }
+html[data-theme="dark"] :is(.viz-badge,.related-kind) { background: var(--bell-accent-soft); color: var(--bell-accent); border-color: var(--bell-border); }
+html[data-theme="dark"] .viz-output { background: var(--bell-surface-raised); color: var(--bell-text-muted); }
+html[data-theme="dark"] .model-settings .ms-speed:disabled,
+html[data-theme="dark"] .model-settings .ms-speed:disabled :is(b,span) { background: var(--bell-surface-raised); color: var(--bell-text-muted); border-color: var(--bell-border); }
+html[data-theme="dark"] .ms-intro-icon,
+html[data-theme="dark"] .workspace-settings-tabs button[aria-selected="true"] { background: var(--bell-accent-soft); color: var(--bell-accent); border-color: var(--bell-border); }
+html[data-theme="dark"] :is(.repo-icon,.repo-source-tabs button.selected,.graph-count) { background: var(--bell-accent-soft); color: var(--bell-accent); border-color: var(--bell-border); }
+html[data-theme="dark"] .graph-panel,
+html[data-theme="dark"] .knowledge-svg { background: var(--bell-surface); border-color: var(--bell-border); }
+html[data-theme="dark"] .knowledge-svg > rect { fill: var(--bell-surface); }
+html[data-theme="dark"] .graph-topic circle { fill: #263047; stroke: #53617a; }
+html[data-theme="dark"] .graph-topic text { fill: var(--bell-text-muted); }
+html[data-theme="dark"] .graph-note rect { fill: #263047; stroke: #53617a; }
+html[data-theme="dark"] .graph-tone-1 rect { fill: #20372f; stroke: #426a5a; }
+html[data-theme="dark"] .graph-tone-2 rect { fill: #383024; stroke: #6c5b3d; }
+html[data-theme="dark"] .graph-note text,
+html[data-theme="dark"] .graph-note .graph-node-category { fill: var(--bell-text); }
+html[data-theme="dark"] .graph-edge { stroke: #405273; }
+html[data-theme="dark"] :is(.graph-toolbar,.graph-footer) { color: var(--bell-text-muted); }
+html[data-theme="dark"] .pdf-viewer { background: var(--bell-code); border-color: var(--bell-border); }
+html[data-theme="dark"] :is(.pdf-page-field input,.pdf-password input) { background: var(--bell-surface-raised); color: var(--bell-text); border-color: var(--bell-border); }
+html[data-theme="dark"] :is(.pdf-tool,.pdf-zoom,.pdf-page-field,.pdf-state,.pdf-state strong,.pdf-page-number) { color: var(--bell-text-muted); }
+html[data-theme="dark"] .reader-pdf-tabs > button.active { background: var(--bell-accent-soft); color: var(--bell-accent); }
+
+@media (max-width: 760px) {
+  .topbar-title { gap: 7px; }
+  .topbar-actions { gap: 10px; }
+  .send-personal-button { white-space: normal; }
+  .review-card-actions { gap: 10px; }
+}
+@media (max-width: 480px) {
+  .theme-toggle { flex: 0 0 36px; }
+  .suite-draft-actions { justify-content: stretch; }
+  .suite-draft-actions > * { flex: 1 1 auto; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

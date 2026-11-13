@@ -1,0 +1,67 @@
+{
+  "camera": {
+    "fov": 640,
+    "initialYaw": -0.38,
+    "initialPitch": 0.18,
+    "entranceVelYaw": 0.016,
+    "inertiaDecay": 0.92,
+    "autoOrbitSpeed": 0.0018,
+    "minZoom": 0.56,
+    "maxZoom": 2.4
+  },
+  "sphere": {
+    "hubRadius": 178,
+    "noteRadius": 204,
+    "topicRadius": 224,
+    "guideRadius": 248,
+    "repulsionNote": 34000,
+    "repulsionTopic": 18000,
+    "springLinkLength": 144,
+    "springTopicLength": 124,
+    "shellStiffness": 0.115,
+    "damping": 0.77,
+    "horizonLabelCutoff": -0.16,
+    "screenMinDotGap": 28
+  },
+  "nodes": {
+    "noteBaseRadius": 5.5,
+    "noteDegreeScale": 0.42,
+    "noteMaxRadius": 8.2,
+    "topicRadius": 3.2,
+    "hitRadius": 18
+  },
+  "palettes": {
+    "dark": {
+      "canvas": "#090B10",
+      "globeRim": "#161D2B",
+      "guideFront": "#1F283B",
+      "guideBack": "#111622",
+      "edgeLink": "#667398",
+      "edgeTopic": "#313B52",
+      "edgeActive": "#9E90FF",
+      "leaderLine": "#4B5675",
+      "topicFill": "#687699",
+      "specHighlight": "#FFFFFF",
+      "labelNote": "#EEF1F8",
+      "labelTopic": "#8C97B0",
+      "labelHalo": "#090B10",
+      "tones": ["#F2A63B", "#34CA8B", "#8D7DF7", "#EB7A56", "#38BDF8"]
+    },
+    "light": {
+      "canvas": "#F6F8FB",
+      "globeRim": "#E2E8F2",
+      "guideFront": "#D3DDEC",
+      "guideBack": "#E7EDF6",
+      "edgeLink": "#8292AA",
+      "edgeTopic": "#C5D1E2",
+      "edgeActive": "#5B45E0",
+      "leaderLine": "#94A3B8",
+      "topicFill": "#64748B",
+      "specHighlight": "#FFFFFF",
+      "labelNote": "#151D2D",
+      "labelTopic": "#5B667C",
+      "labelHalo": "#F6F8FB",
+      "tones": ["#D97706", "#0D9462", "#5B45E0", "#C8522E", "#0284C7"]
+    }
+  }
+}

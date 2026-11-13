@@ -1,0 +1,22 @@
+[Unit]
+Description=BELL Explain personal learning platform
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/apps/bell-explain/current
+Environment=NODE_ENV=production
+Environment=HOME=%h
+Environment=PATH=%h/apps/bell-explain/runtime/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=%h/apps/bell-explain/service.env
+ExecStart=%h/apps/bell-explain/runtime/bin/node --import tsx server/index.ts
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillMode=mixed
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

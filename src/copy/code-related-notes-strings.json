@@ -1,0 +1,93 @@
+{
+  "$meta": {
+    "product": "BELL Suite Polish - BELL Explain CodeBlock & RelatedNotes",
+    "author": "Muse (UX Writer)",
+    "locales": [
+      "zh-TW",
+      "en"
+    ],
+    "targets": {
+      "codeBlock": "BELL-Explain src/components/CodeBlock.tsx (lines 68-69, 77-80, 102-104 - code block header copy button, region landmark aria-labels with optional line highlight range, and manual copy fallback notice)",
+      "relatedNotes": "BELL-Explain src/components/RelatedNotes.tsx (lines 10, 19, 27-29 - section heading/landmark, relation tooltip composition, and show-remaining/collapse toggle) & src/lib/related-notes.ts (lines 13, 26, 34, 38 - RELATION_LABELS, parent/child follow-up reasons, and section backlink label)"
+    },
+    "placeholders": {
+      "{language}": "Programming language label passed to CodeBlock (defaults to 'javascript' in CodeBlock.tsx, or falls back to codeBlock.defaultLanguage when empty).",
+      "{startLine}": "1-based starting line number of the active highlightRange in CodeBlock.tsx.",
+      "{endLine}": "1-based ending line number of the active highlightRange in CodeBlock.tsx.",
+      "{count}": "Remaining relation item count (items.length - SHOWN, where SHOWN = 8) in RelatedNotes.tsx.",
+      "{section}": "Cleaned target step or section heading (leading step/section numbers stripped by cleanHeading()) in related-notes.ts."
+    },
+    "budgets": {
+      "collapseEnMaxChars": 12,
+      "showRemainingTemplateEnMaxChars": 32,
+      "relationLabelEnMaxChars": 16,
+      "copyFallbackEnMaxChars": 48,
+      "layoutNote": "At a 320px viewport, .code-header keeps its copy button icon-only (30px x 28px) with copyCode in aria-label and title, while .copy-error renders as a full-width block (9px font, 8px padding) where 'Select the code to copy it manually.' (36 chars) fits without horizontal overflow. In .related-notes (16px side margins below 600px, 16px horizontal padding = 256px inner width), collapse ('Show less', 9 chars <= 12-char budget) and showRemaining / showRemainingOne ('Show 2 more connections' / 'Show 1 more connection', 22-23 rendered chars at 11px font) stay on a single line."
+    },
+    "rationale": [
+      "Preserves all shipped Taiwanese zh-TW strings byte-for-byte from bell-explain-src 4cdc9b52 / 299f3a49 (src/components/CodeBlock.tsx, src/components/RelatedNotes.tsx, and src/lib/related-notes.ts) so existing UI snapshots and server/math-ui.test.ts plus server/learning-ui.test.ts remain non-regressing.",
+      "Aligns codeBlock.copyCode ('Copy code'), codeBlock.regionAria ('{language} code'), codeBlock.copyFallback ('Select the code to copy it manually.'), and relatedNotes.collapse ('Show less', 9 chars) with BELL-Explain's v3 learning glossary in src/copy/ui-strings.json.",
+      "Provides paired showRemaining and showRemainingOne keys with identical {count} placeholders across zh-TW and en so English renders grammatical singular ('Show 1 more connection') when items.length === 9 and plural ('Show {count} more connections') otherwise.",
+      "Uses directional, beginner-friendly English relation labels ('Further reading', 'Referenced by', 'Continues from', 'Continued in') and plain follow-up reasons so learners can immediately distinguish outbound links, inbound backlinks, parent notes, and child follow-ups in hover tooltips and Markdown exports.",
+      "Wraps {section} in typographic curly double quotes in en.relatedNotes.sectionBacklink to parallel zh-TW corner brackets."
+    ],
+    "assumptions": [
+      "CodeBlock.tsx defaults language = 'javascript'; codeBlock.defaultLanguage ('Code' in en) applies when callers pass an empty language string. When language is empty under ?lang=en, callers formatting regionAria should avoid repeating 'Code code' (rendering defaultLanguage alone), whereas highlightRegionAria ('Code, highlighting lines {startLine} to {endLine}') interpolates defaultLanguage directly.",
+      "relatedNotes.labels uses camelCase keys (linksTo, linkedFrom, continues, continuedBy) mapping 1-to-1 to RelatedNote['kind'] values ('links-to', 'linked-from', 'continues', 'continued-by') in src/lib/related-notes.ts.",
+      "RelatedNotes.tsx renders default heading ('Related notes') when no title prop is passed; LessonV3Reader.tsx and LegacyNoteReader pass their own wrap-up heading ('Read next') via the title prop.",
+      "RelatedNotes.tsx joins [labels[item.kind], item.section, item.reason] with middle dots in each row button's title tooltip; LessonV3Reader.tsx Markdown export joins item.section and item.reason, which should use '; ' in English instead of a full-width semicolon."
+    ]
+  },
+  "zh-TW": {
+    "codeBlock": {
+      "copyCode": "複製程式碼",
+      "defaultLanguage": "程式碼",
+      "regionAria": "{language} 程式碼",
+      "highlightRegionAria": "{language}，目前重點為第 {startLine} 至 {endLine} 行",
+      "copyFallback": "請選取程式碼手動複製。"
+    },
+    "relatedNotes": {
+      "heading": "相關筆記",
+      "collapse": "收起",
+      "showRemaining": "顯示其餘 {count} 項關聯",
+      "showRemainingOne": "顯示其餘 {count} 項關聯",
+      "labels": {
+        "linksTo": "延伸閱讀",
+        "linkedFrom": "被引用",
+        "continues": "延伸自",
+        "continuedBy": "延伸出"
+      },
+      "reasons": {
+        "continues": "這篇是讀完它之後的延伸問題。",
+        "continuedBy": "從這篇的追問延伸出來。"
+      },
+      "sectionBacklink": "關聯到本篇「{section}」"
+    }
+  },
+  "en": {
+    "codeBlock": {
+      "copyCode": "Copy code",
+      "defaultLanguage": "Code",
+      "regionAria": "{language} code",
+      "highlightRegionAria": "{language}, highlighting lines {startLine} to {endLine}",
+      "copyFallback": "Select the code to copy it manually."
+    },
+    "relatedNotes": {
+      "heading": "Related notes",
+      "collapse": "Show less",
+      "showRemaining": "Show {count} more connections",
+      "showRemainingOne": "Show {count} more connection",
+      "labels": {
+        "linksTo": "Further reading",
+        "linkedFrom": "Referenced by",
+        "continues": "Continues from",
+        "continuedBy": "Continued in"
+      },
+      "reasons": {
+        "continues": "This note came from a follow-up question after reading that one.",
+        "continuedBy": "Started from a follow-up question on this note."
+      },
+      "sectionBacklink": "Links to “{section}” in this note"
+    }
+  }
+}

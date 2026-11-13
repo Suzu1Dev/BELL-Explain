@@ -1,0 +1,54 @@
+/* BELL Suite semantic tokens v1 · copied from bell-suite/design/tokens.css. */
+:root {
+  --bell-canvas: #f7f8fa;
+  --bell-surface: #ffffff;
+  --bell-surface-raised: #ffffff;
+  --bell-text: #252b3b;
+  --bell-text-muted: #68758a;
+  --bell-border: #e2e7f0;
+  --bell-accent: #375be9;
+  --bell-accent-soft: #edf1ff;
+  --bell-focus: #7797f5;
+  --bell-radius: 12px;
+  --bell-shadow: 0 18px 50px rgb(32 48 82 / 18%);
+  --bell-code: #f4f6fb;
+  --bell-code-text: #d7e0f2;
+  --bell-danger: #b8433d;
+  --bell-warning: #8a621b;
+  --bell-success: #26784a;
+  --blue: #375be9;
+  --ink: var(--bell-text);
+  --muted: var(--bell-text-muted);
+  --border: var(--bell-border);
+  --surface: var(--bell-surface);
+}
+:root[data-theme="dark"] {
+  --bell-canvas: #10141c;
+  --bell-surface: #181e29;
+  --bell-surface-raised: #202736;
+  --bell-text: #edf1f8;
+  --bell-text-muted: #acb6c9;
+  --bell-border: #354055;
+  --bell-accent: #a9baff;
+  --bell-accent-soft: #29344f;
+  --bell-focus: #b7c7ff;
+  --bell-shadow: 0 20px 60px rgb(0 0 0 / 42%);
+  --bell-code: #111722;
+  --bell-code-text: #d7e0f2;
+  --bell-danger: #ff9f98;
+  --bell-warning: #e7bd73;
+  --bell-success: #8ed6ac;
+  --blue: #4c68d8;
+}
+body {
+  background: var(--bell-canvas);
+  color: var(--bell-text);
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline-color: var(--bell-focus);
+}

@@ -1,0 +1,144 @@
+{
+  "$meta": {
+    "product": "BELL Suite Polish - BELL Explain PracticalExample, SemanticSearch & Page References",
+    "author": "Muse (UX Writer)",
+    "locales": [
+      "zh-TW",
+      "en"
+    ],
+    "targets": {
+      "practicalExample": "BELL-Explain src/components/PracticalExample.tsx (lines 10-14, 54-130 - worked code-example card eyebrow, scenario/environment labels, live focus caption, interactive step walkthrough, predict-first textarea/reveal flow, expected output block, and application heading)",
+      "semanticSearch": "BELL-Explain src/components/SemanticSearch.tsx (lines 9-12, 24-46 - Library and inline compact search landmarks, headings, hybrid/keyword mode badges and tooltips, loading/empty/error/keyword-help states, note citation label, similarity badge/tooltip, plus server/knowledge.ts indexed title suffixes and fallback warning)",
+      "pageReferences": "BELL-Explain src/lib/page-references.tsx (line 35 - clickable PDF citation link title tooltip opening the cited page in the side-by-side PDF viewer)"
+    },
+    "placeholders": {
+      "{line}": "1-based line number when a walkthrough step highlights a single line (startLine === endLine) in PracticalExample.tsx.",
+      "{startLine}": "1-based starting line number when a walkthrough step highlights a range (startLine !== endLine) in PracticalExample.tsx.",
+      "{endLine}": "1-based ending line number when a walkthrough step highlights a range in PracticalExample.tsx.",
+      "{lines}": "Pre-formatted localized line label returned by lineLabel(startLine, endLine) (e.g., 'Line 4' or 'Lines 3-6' with numeric en dash).",
+      "{step}": "1-based walkthrough step number (index + 1) in PracticalExample.tsx.",
+      "{score}": "Two-decimal cosine similarity score formatted via item.semanticScore.toFixed(2) (e.g., '0.84') in SemanticSearch.tsx.",
+      "{term}": "Saved annotation term or phrase on indexed explanation chunks in SemanticSearch.tsx / server/knowledge.ts.",
+      "{name}": "Attached source document filename on indexed document chunks in SemanticSearch.tsx / server/knowledge.ts.",
+      "{page}": "1-based PDF page number clamped to [1, pages] in page-references.tsx."
+    },
+    "budgets": {
+      "modeBadgeEnMaxChars": 20,
+      "inlineRevealButtonEnMaxChars": 18,
+      "primaryRevealButtonEnMaxChars": 24,
+      "citationLabelEnMaxChars": 16,
+      "similarityBadgeTemplateEnMaxChars": 20,
+      "searchHeadingEnMaxChars": 28,
+      "pageRefTitleTemplateEnMaxChars": 36,
+      "overallEnMaxChars": 96,
+      "layoutNote": "At 320px / 360px viewports (288px / 328px outer card width; .practical-example uses 16px padding below 620px = 256px / 296px inner width; .semantic-search uses 15px padding below 620px = 258px / 298px inner width), flex-wrap rules on .practical-code-caption, .practical-result-heading, .semantic-heading, and .semantic-citation prevent horizontal overflow. Mode badges ('Meaning + keywords' 18 chars, 'Keyword search' 14 chars) and citation items ('Note passage' 12 chars + 'Similarity 0.84' 15 chars = ~174px <= 234px result inner width at 320px) fit cleanly without clipping."
+    },
+    "rationale": [
+      "Preserves all shipped Taiwanese zh-TW strings byte-for-byte across PracticalExample.tsx (22 keys), SemanticSearch.tsx + server/knowledge.ts search outputs (15 keys), and page-references.tsx (1 key) so existing zh-TW UI and tests stay 100% non-regressing.",
+      "Aligns English nouns with BELL-Explain's shipped glossary in ui-strings.json, explain-pdf-viewer.json, and annotation-explanation-card.json: Library for the saved-notes collection, note for lesson documents, Explanation for saved term annotations, Expected output for program output, and original PDF for source PDFs.",
+      "Keeps predict-first prompts warm, encouraging, and honest ('not saved', 'Traced from the code / Not run live' with middle dot in copy) so learners know upfront their scratch prediction stays private in memory and the output is traced rather than executed.",
+      "Translates vector/embedding concepts into plain, beginner-friendly English ('Meaning + keywords', 'Keyword search', 'Turn on the multilingual search model in Settings...') while keeping the hover tooltip on Similarity {score} clear that cosine similarity ranks results rather than measuring accuracy."
+    ],
+    "assumptions": [
+      "PracticalExample.tsx lineLabel(startLine, endLine) uses practicalExample.lineSingle ({line}) when startLine === endLine and practicalExample.lineRange ({startLine}, {endLine}, joined by numeric en dash U+2013) otherwise, then passes the formatted string as {lines} into currentFocus and stepButtonAria.",
+      "SemanticSearch.tsx lessonTitle(title) splits indexed note chunk titles on the server's Chinese explanation and document suffixes produced at index time by server/knowledge.ts; annotationTitleSuffix and documentTitleSuffix let lessonTitle() render localized English suffixes under ?lang=en without reindexing SQLite.",
+      "server/knowledge.ts sets KnowledgeSearch.warning to semanticFallbackWarning when embedding query execution fails at search time; pairing it here lets SemanticSearch.tsx localize result.warning under ?lang=en while leaving server responses untouched."
+    ]
+  },
+  "zh-TW": {
+    "practicalExample": {
+      "lineSingle": "第 {line} 行",
+      "lineRange": "第 {startLine}–{endLine} 行",
+      "eyebrow": "用一個小案例理解",
+      "scenarioLabel": "實際情境",
+      "environmentLabel": "執行環境",
+      "codeCaption": "一個小而完整的 case",
+      "currentFocus": "{lines} · 目前重點",
+      "walkthroughHeading": "白話拆解",
+      "walkthroughHint": "點選任一步，對照上方標亮的程式碼。",
+      "walkthroughListAria": "逐段程式碼解說",
+      "stepButtonAria": "對照步驟 {step}：{lines}",
+      "lastStepPrompt": "這幾行在做什麼？先在心裡用一句話說說看。",
+      "revealStepAction": "看說明",
+      "expectedResultHeading": "預期結果",
+      "predictFirstNote": "先預測，再對照",
+      "derivedNotExecutedNote": "依程式邏輯推導 · 未實際執行",
+      "guessLabel": "執行後你預期會看到什麼？寫下來再對照（不會儲存）。",
+      "guessPlaceholder": "例如：印出 1、2、3，最後佇列是空的",
+      "revealResultAction": "揭曉預期結果",
+      "yourGuessLabel": "你的預測",
+      "expectedResultAria": "推導的預期結果",
+      "applicationHeading": "什麼時候用得上？"
+    },
+    "semanticSearch": {
+      "searchUnavailableError": "搜尋暫時無法回應。",
+      "compactRegionAria": "相關知識段落",
+      "regionAria": "知識庫搜尋結果",
+      "compactHeading": "與這一段相關",
+      "heading": "跨筆記與程式碼搜尋",
+      "keywordModeTitle": "尚未啟用語意向量，依文字內容比對",
+      "modeHybrid": "語意＋關鍵字",
+      "modeKeyword": "關鍵字搜尋",
+      "semanticFallbackWarning": "語意模型暫時無法查詢，這次使用關鍵字搜尋。",
+      "keywordHelp": "在設定中啟用多語向量模型，就能搜尋用不同文字描述的相關概念。",
+      "loadingMessage": "正在比對相關段落…",
+      "emptyMessage": "目前沒有相符的段落，試試其他概念或先建立筆記與 Repo 索引。",
+      "lessonCitationLabel": "筆記段落",
+      "similarityBadge": "相似度 {score}",
+      "similarityTitle": "向量餘弦相似度，用來排序，並非正確率。",
+      "annotationTitleSuffix": " · 詞句解釋：{term}",
+      "documentTitleSuffix": " · 文件：{name}"
+    },
+    "pageReferences": {
+      "openInPdfTitle": "在 PDF 原文開啟第 {page} 頁"
+    }
+  },
+  "en": {
+    "practicalExample": {
+      "lineSingle": "Line {line}",
+      "lineRange": "Lines {startLine}–{endLine}",
+      "eyebrow": "Learn through a quick example",
+      "scenarioLabel": "Real-world scenario",
+      "environmentLabel": "Environment",
+      "codeCaption": "A small, complete example",
+      "currentFocus": "{lines} · In focus",
+      "walkthroughHeading": "Step-by-step walkthrough",
+      "walkthroughHint": "Select any step to highlight the matching lines above.",
+      "walkthroughListAria": "Line-by-line code walkthrough",
+      "stepButtonAria": "Highlight step {step}: {lines}",
+      "lastStepPrompt": "What do these lines do? Try putting it into one sentence first.",
+      "revealStepAction": "Show explanation",
+      "expectedResultHeading": "Expected output",
+      "predictFirstNote": "Predict first, then check",
+      "derivedNotExecutedNote": "Traced from the code · Not run live",
+      "guessLabel": "What do you expect to see when this runs? Jot it down to compare (not saved).",
+      "guessPlaceholder": "e.g., Prints 1, 2, 3, leaving the queue empty",
+      "revealResultAction": "Reveal expected output",
+      "yourGuessLabel": "Your prediction",
+      "expectedResultAria": "Traced expected output",
+      "applicationHeading": "When to use this"
+    },
+    "semanticSearch": {
+      "searchUnavailableError": "Search isn't responding right now.",
+      "compactRegionAria": "Related passages",
+      "regionAria": "Library search results",
+      "compactHeading": "Related to this passage",
+      "heading": "Search across notes & code",
+      "keywordModeTitle": "Semantic search isn't turned on yet; matching by exact words",
+      "modeHybrid": "Meaning + keywords",
+      "modeKeyword": "Keyword search",
+      "semanticFallbackWarning": "Semantic matching isn't responding right now, so these results use keyword search.",
+      "keywordHelp": "Turn on the multilingual search model in Settings to find related concepts worded differently.",
+      "loadingMessage": "Finding matching passages…",
+      "emptyMessage": "No matching passages yet. Try another concept, or add notes and index a repository first.",
+      "lessonCitationLabel": "Note passage",
+      "similarityBadge": "Similarity {score}",
+      "similarityTitle": "Cosine similarity used to rank results, not an accuracy score.",
+      "annotationTitleSuffix": " · Explanation: {term}",
+      "documentTitleSuffix": " · Document: {name}"
+    },
+    "pageReferences": {
+      "openInPdfTitle": "Open page {page} in original PDF"
+    }
+  }
+}

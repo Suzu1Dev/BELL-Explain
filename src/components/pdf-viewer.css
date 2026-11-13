@@ -1,0 +1,59 @@
+.pdf-viewer{container-type:inline-size;display:flex;flex-direction:column;height:100%;min-height:0;background:var(--chrome);border:1px solid var(--line);border-radius:var(--radius-lg,12px);overflow:hidden}
+.pdf-toolbar{display:flex;align-items:center;gap:4px;padding:7px 8px;background:var(--raised);border-bottom:1px solid var(--line);flex-shrink:0}
+.pdf-tool{display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;border-radius:var(--radius-md,8px);color:var(--text-2)}
+.pdf-tool:hover:not(:disabled),.pdf-zoom:hover:not(:disabled){background:var(--raised-2);color:var(--explain-text)}
+.pdf-tool:disabled,.pdf-zoom:disabled{opacity:.4}
+.pdf-page-field{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:var(--text-ui,13px);font-variant-numeric:tabular-nums;color:var(--text-3)}
+.pdf-page-field input{width:44px;height:28px;padding:0 6px;text-align:center;border:1px solid var(--line);border-radius:var(--radius-sm,6px);font:inherit;color:var(--text);background:var(--panel)}
+.pdf-page-field input:focus{outline:none;box-shadow:var(--focus);border-color:var(--explain-text)}
+.pdf-toolbar-gap{flex:1;min-width:0}
+.pdf-zoom{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;gap:4px;min-width:30px;height:30px;padding:0 8px;border-radius:var(--radius-md,8px);font-size:var(--text-ui,13px);font-variant-numeric:tabular-nums;color:var(--text-2);white-space:nowrap}
+/* Pages center with auto margins, not align-items: a page zoomed wider than the pane then starts at its left edge, which stays scrollable. */
+.pdf-scroller{position:relative;flex:1;min-height:0;overflow:auto;padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:14px;overscroll-behavior:contain}
+.pdf-scroller:focus-visible{outline:none;box-shadow:var(--focus)}
+.pdf-page{position:relative;flex-shrink:0;margin-inline:auto;background:#fff;box-shadow:0 1px 3px #1a2a4a1f,0 6px 18px #1a2a4a14;border-radius:2px;
+  --scale-round-x:1px;--scale-round-y:1px}
+.pdf-page canvas{display:block;border-radius:2px}
+.pdf-page.is-cited{box-shadow:0 0 0 3px var(--explain),0 6px 18px #1a2a4a24}
+.pdf-page-number{position:absolute;right:-1px;bottom:-21px;font:var(--text-micro,11px)/var(--lh-micro,16px) var(--font-mono);color:var(--text-3)}
+.pdf-page.is-cited .pdf-page-number{color:var(--explain-text);font-weight:600}
+.pdf-state{margin:auto;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:9px;padding:28px 20px;text-align:center;color:var(--text-3);font-size:var(--text-ui,13px);line-height:var(--lh-ui,20px)}
+.pdf-state strong{font-size:var(--text-body,14px);line-height:var(--lh-body,22px);color:var(--text-2)}
+.pdf-password input{width:100%;height:36px;padding:0 10px;border:1px solid var(--line-2);border-radius:var(--radius-md,8px);font:inherit;color:var(--text);background:var(--panel)}
+.pdf-password svg{color:var(--explain-text)}
+.pdf-password .document-choose{min-height:36px;padding:8px 14px;border:1px solid var(--explain);border-radius:var(--radius-md,8px);background:var(--explain);color:var(--explain-on);font-size:var(--text-ui,13px);font-weight:500}
+@container (max-width: 370px){
+  .pdf-toolbar{padding:6px 4px;gap:2px}
+  .pdf-tool{width:28px}
+  .pdf-page-field{gap:4px}
+  .pdf-page-field input{width:38px;padding:0 4px}
+  .pdf-zoom{padding:0 5px}
+  .pdf-zoom > span{display:none}
+}
+@media (max-width: 480px){
+  .pdf-toolbar{padding:6px 4px;gap:2px}
+  .pdf-tool{width:28px}
+  .pdf-page-field{gap:4px}
+  .pdf-page-field input{width:38px;padding:0 4px}
+  .pdf-zoom{padding:0 5px}
+  .pdf-zoom > span{display:none}
+}
+@media (pointer: coarse){
+  .pdf-tool,.pdf-zoom,.pdf-password input,.pdf-password .document-choose,.pdf-state .text-button{min-height:var(--row-touch,44px)}
+  .pdf-password input{font-size:16px}
+}
+
+/* Text layer from pdf.js (pdf_viewer.css), trimmed to what selection needs. */
+.pdf-page .textLayer{color-scheme:only light;position:absolute;text-align:initial;inset:0;overflow:clip;opacity:1;line-height:1;letter-spacing:normal;word-spacing:normal;
+  -webkit-text-size-adjust:none;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;caret-color:CanvasText;z-index:0;
+  --min-font-size:1;--text-scale-factor:calc(var(--total-scale-factor) * var(--min-font-size));--min-font-size-inv:calc(1 / var(--min-font-size))}
+.pdf-page .textLayer :is(span,br){color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%;-webkit-user-select:text;user-select:text}
+.pdf-page .textLayer > :not(.markedContent),.pdf-page .textLayer .markedContent span:not(.markedContent){z-index:1;--font-height:0;font-size:calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x:1;--rotate:0deg;transform:rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv))}
+.pdf-page .textLayer .markedContent{display:contents}
+.pdf-page .textLayer span[role="img"]{-webkit-user-select:none;user-select:none;cursor:default}
+.pdf-page .textLayer ::selection{background:rgb(0 90 255 / .25);color:transparent}
+.pdf-page .textLayer br::selection{background:transparent}
+.pdf-page .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:0;cursor:default;-webkit-user-select:none;user-select:none}
+.pdf-page .textLayer.selecting .endOfContent{top:0}
+@media(prefers-reduced-motion:reduce){.pdf-scroller{scroll-behavior:auto}}

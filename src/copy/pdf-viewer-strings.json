@@ -1,0 +1,80 @@
+{
+  "$meta": {
+    "product": "BELL Suite Polish · BELL Explain PDF Viewer",
+    "author": "Muse (UX Writer)",
+    "locales": [
+      "zh-TW",
+      "en"
+    ],
+    "targets": {
+      "pdfViewer": "BELL-Explain src/components/PdfViewer.tsx (lines 213-250, PDF toolbar, document/page landmarks, password unlock, local-first missing-PDF notice, and open error states)"
+    },
+    "budgets": {
+      "fitWidthEnMaxChars": 10,
+      "unlockActionEnMaxChars": 12,
+      "reopenActionEnMaxChars": 12,
+      "layoutNote": "At 320px/360px narrow split-reader widths, visible toolbar text is restricted to fitWidth ('Fit width', 9 chars), while prev/next, zoom, and download controls stay icon-only with accessible aria-label/title copy."
+    },
+    "rationale": [
+      "Preserves all 21 shipped Taiwanese zh-TW strings verbatim from PdfViewer.tsx so existing UI snapshots and tests remain non-regressing.",
+      "Keeps the sole visible toolbar button label ('Fit width', 9 chars) within the <=10-character budget for 320px/360px narrow reader split panes.",
+      "Uses plain, reassuring beginner-friendly English ('damaged' instead of 'corrupted', browser-local password reassurance without technical jargon).",
+      "Keeps missingTitle and missingBody faithful to BELL Explain's local-first sync model: synced notes keep their explanations and extracted text readable even when the raw PDF remains on the server where it was originally uploaded."
+    ],
+    "assumptions": [
+      "passwordPrivacyHint describes client-side PDF decryption inside PdfViewer.tsx where the entered password is passed only to the in-browser PDF renderer and never persisted or transmitted.",
+      "missingTitle and missingBody render when note metadata/text synced from another device or instance without transferring the original binary PDF file.",
+      "unlockAction ('Open') submits the in-browser password form and pairs with reopenAction ('Reopen') for retrying failed document loads."
+    ]
+  },
+  "zh-TW": {
+    "pdfViewer": {
+      "toolbarAria": "PDF 檢視工具",
+      "prevPage": "上一頁",
+      "currentPageAria": "目前頁碼",
+      "nextPage": "下一頁",
+      "zoomOut": "縮小",
+      "fitWidth": "符合寬度",
+      "zoomIn": "放大",
+      "downloadOriginal": "下載原始 PDF",
+      "documentAria": "PDF 原文：{fileName}",
+      "pageAria": "第 {page} 頁",
+      "loading": "正在開啟 PDF…",
+      "passwordTitle": "這份 PDF 有密碼保護",
+      "passwordRetryTitle": "密碼不正確，請再試一次",
+      "passwordPrivacyHint": "密碼只在這個瀏覽器中用來開啟檔案，不會傳到伺服器或儲存。",
+      "passwordInputAria": "PDF 密碼",
+      "unlockAction": "開啟",
+      "missingTitle": "這台伺服器沒有原始 PDF",
+      "missingBody": "筆記可能來自另一個裝置的同步。解說與擷取文字仍可閱讀；原檔保存在上傳時的伺服器。",
+      "errorTitle": "無法開啟 PDF",
+      "errorBody": "檔案可能已損毀或格式不受支援。",
+      "reopenAction": "重新開啟"
+    }
+  },
+  "en": {
+    "pdfViewer": {
+      "toolbarAria": "PDF viewer controls",
+      "prevPage": "Previous page",
+      "currentPageAria": "Current page",
+      "nextPage": "Next page",
+      "zoomOut": "Zoom out",
+      "fitWidth": "Fit width",
+      "zoomIn": "Zoom in",
+      "downloadOriginal": "Download original PDF",
+      "documentAria": "Original PDF: {fileName}",
+      "pageAria": "Page {page}",
+      "loading": "Opening PDF…",
+      "passwordTitle": "This PDF is password-protected",
+      "passwordRetryTitle": "Incorrect password — please try again",
+      "passwordPrivacyHint": "Your password is used only in this browser to open the file. It's never sent to a server or saved.",
+      "passwordInputAria": "PDF password",
+      "unlockAction": "Open",
+      "missingTitle": "Original PDF isn't on this server",
+      "missingBody": "This note may have synced from another device. You can still read the explanations and extracted text; the original file stays on the server where it was uploaded.",
+      "errorTitle": "Couldn't open PDF",
+      "errorBody": "The file may be damaged or in an unsupported format.",
+      "reopenAction": "Reopen"
+    }
+  }
+}

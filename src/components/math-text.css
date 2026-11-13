@@ -1,0 +1,24 @@
+/* KaTeX's default 1.21em is tuned for Latin text; beside CJK it looks oversized. */
+.math .katex { font-size: 1.1em; }
+/* A formula paints only inside its own boxes, so a negative kern, \llap or \rlap in untrusted
+   LaTeX cannot draw over the text around it. Clipping each KaTeX base of an inline formula keeps
+   line breaks and the baseline as they were; the slack keeps italic overhangs. */
+.math:not(.math-display) .katex-base { clip-path: inset(-.15em); }
+/* A display formula stays inside its own block, which also clips, so wide limits under a sum
+   (\mathclap) stay whole. A wide one scrolls on its own instead of widening the page. */
+.math-display { display: block; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+.math-display .katex-display { margin: .45em 0; }
+.math-invalid { color: #9a5b16; }
+/* KaTeX did not load: the title says whether it retries or needs a reload. */
+.math-unloaded { text-decoration: underline dotted; cursor: help; }
+/* `code` in prose: the backticks are dropped; long names and paths wrap instead of widening the page. */
+code.inline-code {
+  padding: .05em .35em;
+  border-radius: 4px;
+  background: #eef1f6;
+  color: #2f3b52;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: .9em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

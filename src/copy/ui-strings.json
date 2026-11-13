@@ -1,0 +1,3193 @@
+{
+  "_meta": {
+    "product": "BELL Explain · Learning & Review v3",
+    "locales": [
+      "zh-TW",
+      "en"
+    ],
+    "placeholders": "Curly-brace tokens such as {current}, {total}, {vars}, {interval}, {lessonTitle} are interpolated at runtime.",
+    "layoutFlexNotes": [
+      {
+        "selector": ".seq (learning.css:220, 391)",
+        "issue": "Sequence lane column is fixed at 88px on desktop and 56px at <=720px (04-IMPLEMENTATION.md notes 72px at 360px). English lane labels within the <=6 width limit (up to 12 ASCII chars, e.g. 'Microtasks', 'Call stack') need ~76-96px.",
+        "recommendation": "Use minmax(88px, max-content) (capped at 112px) on desktop and 72px on 360px with text-overflow: ellipsis."
+      },
+      {
+        "selector": ".cmp dl div (learning.css:211, 372)",
+        "issue": "Compare row label column is 72px on desktop and 64px on 360px. English row labels within <=8 width (up to 16 ASCII chars, e.g. 'Starts at', '1st call') reach ~72-80px.",
+        "recommendation": "Flex column 1 to minmax(72px, 88px) on desktop and minmax(68px, 80px) on 360px."
+      },
+      {
+        "selector": ".tl-row, .tl-axis (learning.css:238, 250, 394)",
+        "issue": "Timeline row label column drops to 44px on 360px. English labels like 'Timer 1' or 'Input' (<=6 width) are ~48-52px wide at 13px font.",
+        "recommendation": "Widen mobile label track from 44px to 56px (desktop 64px -> 68px)."
+      },
+      {
+        "selector": ".recall-top (learning.css:263-264) & .recap li .r (learning.css:287)",
+        "issue": "English post-rating status 'Got it · Reviews start later' (~28 chars) or 'Not sure · Demo lessons aren't queued' (~37 chars) sits alongside the 'Recall' header on 360px.",
+        "recommendation": "Allow flex-wrap: wrap; row-gap: 4px; on .recall-top so .state-note wraps cleanly below on narrow screens. Use compact wrapUp.statusWaiting ('Starts later') inside .recap li .r where white-space: nowrap applies."
+      },
+      {
+        "selector": ".topbar .chip-btn (learning.css:89)",
+        "issue": "English 'Think first' is slightly wider than '先想再看', though hidden via .wide at <=720px.",
+        "recommendation": "Keep white-space: nowrap on .chip-btn; in the <=720px overflow menu, allow full-width menu rows."
+      }
+    ],
+    "assumptions": [
+      "In-lesson recall scheduling (P3 backend server/learning.ts rateRecall, ts-fsrs, 9f5a0fb): first rating schedules Good (記得) ~10 min out and Again (不確定) ~1 min out, growing across later reviews; due can also be in the past when reopening an earlier lesson. Because scheduled.dueNow (待複習 / Due for review) is used whenever due - now falls within the backend's early-review window (~20 min, LEARN_AHEAD_MS), the first 記得 (~10 min out) shows 記得 · 待複習 / Got it · Due for review because the card is already in the review queue. Confirmation copy always reflects the real RecallState (scheduled + due, waiting for 記得 past the daily cap, or demo) and never promises a fixed day count.",
+      "Scheduled due buckets (local clock relative to now, using the ~20 min early-review window LEARN_AHEAD_MS): due - now within the ~20 min early-review window (including due <= now) -> dueNow (待複習 / Due for review); past the ~20 min window through 59 min -> minutes; 1-5 hr on the same calendar day (or <6 hr overnight) -> hours; >=6 hr on the same calendar day -> todayAt (or day-only today); next local calendar day -> tomorrowAt (or day-only tomorrow); >=2 local calendar days -> days (n >= 2).",
+      "Daily new-card cap (server/learning.ts 9f5a0fb: max 3 new cards/lesson/day, 15/day total): only 記得 (Good) rated past today's new-card limit returns status \"waiting\" (記得 · 之後開始複習 / Got it · Reviews start later; wrap-up pill wrapUp.statusWaiting: 之後開始複習 / Starts later; optional tooltip recall.waitingTooltip), joining review on the first later day with room. 不確定 (Again) is a miss and is always scheduled immediately without using the daily allowance, so it is never \"waiting\". The backend never returns \"tomorrow\".",
+      "Failed v3 restructure (server/ai.ts, shared/types.ts failedFormat: 3, server/sync.ts): when v3 validation fails twice or the source exceeds the v3 prompt limit, the complete note is saved in the classic layout with badge 整理失敗 / Couldn't format. Because L1.7 (更多 › 整理成新格式) is not yet wired in LegacyNoteReader, reformatFailedTooltip tells learners they can read as is or try again from the original source; reformatFailedTooltipRebuild is provided ready for when L1.7 lands, and reformatFailedSyncHeld covers sync holding format-3 / failedFormat-3 notes locally against an un-updated sync server.",
+      "End-of-lesson Wrap-up (04-IMPLEMENTATION P3.7, ol.v3-recap): rows report recall outcome rather than next due time—statusRemembered (記得 / Got it), statusUnsure (不確定 / Not sure), statusWaiting (之後開始複習 / Starts later, when 記得 hits the daily new-card cap), or statusUnanswered (未回想 / Not tried). Because freshly rated cards almost all land inside the 20-min early-review window, repeating due times or demo flags on every row adds no signal; wrapUp.statusDueNow, wrapUp.statusAskToday, and wrapUp.statusDemo were removed so P3.7 stays strictly outcome-based.",
+      "SelfCheck under Follow-ups (04-IMPLEMENTATION P0.5) & legacy check cards: in legacy lessons, optional free-response checking sits under 延伸問題 / Go further (disconnected-model notice shown at most once per lesson), while missed questions enter Review with card kind \"check\" labeled 自我檢查 / Self-check (review.kindCheckLegacy, matching ReviewSession.tsx KIND_LABELS.check). Format-3 lessons never create \"check\" cards—their 延伸問題 are branch-to-new-lesson prompts only."
+    ]
+  },
+  "nav": {
+    "brandAria": {
+      "zh-TW": "BELL Explain 導覽",
+      "en": "BELL Explain navigation"
+    },
+    "search": {
+      "zh-TW": "搜尋",
+      "en": "Search"
+    },
+    "learn": {
+      "zh-TW": "學習",
+      "en": "Learn"
+    },
+    "review": {
+      "zh-TW": "複習",
+      "en": "Review"
+    },
+    "library": {
+      "zh-TW": "知識庫",
+      "en": "Library"
+    },
+    "graph": {
+      "zh-TW": "知識圖譜",
+      "en": "Knowledge Map"
+    },
+    "bookmarks": {
+      "zh-TW": "收藏",
+      "en": "Saved"
+    },
+    "categories": {
+      "zh-TW": "分類",
+      "en": "Topics"
+    },
+    "repositories": {
+      "zh-TW": "Repo 索引",
+      "en": "Repo Index"
+    },
+    "settings": {
+      "zh-TW": "設定",
+      "en": "Settings"
+    }
+  },
+  "shell": {
+    "documentTitle": {
+      "zh-TW": "BELL Explain — 讓理解發生",
+      "en": "BELL Explain — Make understanding happen"
+    },
+    "sidebarAria": {
+      "zh-TW": "側邊導覽",
+      "en": "Sidebar navigation"
+    },
+    "closeNavigationAria": {
+      "zh-TW": "關閉導覽",
+      "en": "Close navigation"
+    },
+    "switchProduct": {
+      "zh-TW": "切換 BELL 產品",
+      "en": "Switch BELL products"
+    },
+    "searchLibraryAria": {
+      "zh-TW": "搜尋知識庫",
+      "en": "Search Library"
+    },
+    "primaryNavigationAria": {
+      "zh-TW": "主要導覽",
+      "en": "Primary navigation"
+    },
+    "reviewUnknownAria": {
+      "zh-TW": "複習，數量尚未確認",
+      "en": "Review, count not confirmed yet"
+    },
+    "reviewDueAria": {
+      "zh-TW": "複習，{count} 張待複習",
+      "en": "Review, {count} cards due"
+    },
+    "reviewDueAriaOne": {
+      "zh-TW": "複習，{count} 張待複習",
+      "en": "Review, {count} card due"
+    },
+    "reviewEmptyAria": {
+      "zh-TW": "複習，目前沒有待複習卡片",
+      "en": "Review, no cards due"
+    },
+    "reviewErrorTitle": {
+      "zh-TW": "複習數量讀取失敗，點進頁面重試",
+      "en": "Couldn't load the review count. Open Review to try again."
+    },
+    "reviewStaleTitle": {
+      "zh-TW": "顯示上次成功的複習數量",
+      "en": "Showing the last successful review count"
+    },
+    "libraryUnknownTitle": {
+      "zh-TW": "知識庫 · 數量尚未確認",
+      "en": "Library · count not confirmed yet"
+    },
+    "libraryTitle": {
+      "zh-TW": "知識庫 · {count} 篇筆記",
+      "en": "Library · {count} notes"
+    },
+    "libraryTitleOne": {
+      "zh-TW": "知識庫 · {count} 篇筆記",
+      "en": "Library · {count} note"
+    },
+    "bookmarksTitle": {
+      "zh-TW": "收藏 · {count} 篇筆記",
+      "en": "Saved · {count} notes"
+    },
+    "bookmarksTitleOne": {
+      "zh-TW": "收藏 · {count} 篇筆記",
+      "en": "Saved · {count} note"
+    },
+    "openSettingsAria": {
+      "zh-TW": "開啟設定",
+      "en": "Open Settings"
+    },
+    "expandSidebar": {
+      "zh-TW": "展開側邊欄",
+      "en": "Expand sidebar"
+    },
+    "collapseSidebar": {
+      "zh-TW": "收合側邊欄",
+      "en": "Collapse sidebar"
+    },
+    "openNavigationAria": {
+      "zh-TW": "開啟導覽",
+      "en": "Open navigation"
+    },
+    "breadcrumbsAria": {
+      "zh-TW": "位置",
+      "en": "Breadcrumb"
+    },
+    "codexDisconnectedSettings": {
+      "zh-TW": "Codex 未連接 · 設定",
+      "en": "AI not connected · Settings"
+    },
+    "switchToLight": {
+      "zh-TW": "切換為亮色模式",
+      "en": "Switch to light mode"
+    },
+    "switchToDark": {
+      "zh-TW": "切換為暗色模式",
+      "en": "Switch to dark mode"
+    },
+    "reviewUnknownBadge": {
+      "zh-TW": "—",
+      "en": "—"
+    },
+    "reviewErrorAria": {
+      "zh-TW": "複習，無法讀取數量",
+      "en": "Review, couldn't load count"
+    },
+    "reviewStaleAria": {
+      "zh-TW": "複習，{count} 張待複習（上次成功的數量）",
+      "en": "Review, {count} cards due (last known count)"
+    },
+    "reviewStaleAriaOne": {
+      "zh-TW": "複習，{count} 張待複習（上次成功的數量）",
+      "en": "Review, {count} card due (last known count)"
+    },
+    "reviewRetry": {
+      "zh-TW": "重試",
+      "en": "Try again"
+    },
+    "reviewRetryAria": {
+      "zh-TW": "重新載入複習數量",
+      "en": "Reload review count"
+    },
+    "reviewRetryTitle": {
+      "zh-TW": "複習數量讀取失敗，點選即可重試",
+      "en": "Couldn't load review count. Select to try again."
+    },
+    "reviewRetryingAria": {
+      "zh-TW": "正在重新載入複習數量…",
+      "en": "Reloading review count…"
+    }
+  },
+  "lesson": {
+    "topbar": {
+      "backToLibraryAria": {
+        "zh-TW": "回到知識庫",
+        "en": "Back to Library"
+      },
+      "breadcrumbLibrary": {
+        "zh-TW": "知識庫",
+        "en": "Library"
+      },
+      "predictToggle": {
+        "zh-TW": "先想再看",
+        "en": "Think first"
+      },
+      "predictTooltip": {
+        "zh-TW": "圖解與回想的答案先隱藏，想過再揭曉",
+        "en": "Hide the next step and answers so you can guess before checking"
+      },
+      "predictTooltipLegacy": {
+        "zh-TW": "開啟時，案例結果與動畫每一步的變化會先隱藏，讓你先預測再揭曉",
+        "en": "Hide example results and animation steps so you can predict before checking"
+      },
+      "sendToPersonal": {
+        "zh-TW": "送到 Personal",
+        "en": "Send to Personal"
+      },
+      "sendToPr": {
+        "zh-TW": "送到 BELL PR",
+        "en": "Send to BELL PR"
+      },
+      "sendToPersonalAria": {
+        "zh-TW": "送到 Personal",
+        "en": "Send to Personal"
+      },
+      "sendToPersonalTooltip": {
+        "zh-TW": "在 Personal 開啟可編輯的待辦草稿",
+        "en": "Open an editable task draft in Personal"
+      },
+      "sendToPersonalUnavailable": {
+        "zh-TW": "尚未連結 BELL Personal",
+        "en": "BELL Personal isn't connected yet"
+      },
+      "sendToPersonalDisabledAria": {
+        "zh-TW": "送到 Personal，尚未連結",
+        "en": "Send to Personal, not linked"
+      },
+      "bookmarkAria": {
+        "zh-TW": "收藏筆記",
+        "en": "Save lesson"
+      },
+      "unbookmarkAria": {
+        "zh-TW": "取消收藏筆記",
+        "en": "Remove from Saved"
+      },
+      "bookmarkTooltip": {
+        "zh-TW": "收藏",
+        "en": "Save"
+      },
+      "unbookmarkTooltip": {
+        "zh-TW": "取消收藏",
+        "en": "Remove from Saved"
+      },
+      "bookmarkErrorToast": {
+        "zh-TW": "收藏失敗",
+        "en": "Couldn't update Saved"
+      },
+      "moreActionsAria": {
+        "zh-TW": "更多操作",
+        "en": "More actions"
+      },
+      "moreActionsTooltip": {
+        "zh-TW": "更多操作",
+        "en": "More actions"
+      },
+      "themeToggleAria": {
+        "zh-TW": "切換亮暗主題",
+        "en": "Switch light or dark theme"
+      }
+    },
+    "moreMenu": {
+      "reformatV3": {
+        "zh-TW": "整理成新格式",
+        "en": "Rebuild in step-by-step view"
+      },
+      "reformattingV3": {
+        "zh-TW": "正在整理成新格式…",
+        "en": "Rebuilding into steps…"
+      },
+      "reformatProgress": {
+        "zh-TW": "正在把這篇筆記整理成步驟版面…",
+        "en": "Rebuilding this note into steps…"
+      },
+      "reformatSuccessBanner": {
+        "zh-TW": "已整理成一步一重點的新版面。",
+        "en": "Updated to the step-by-step layout."
+      },
+      "reformatSuccessToast": {
+        "zh-TW": "已整理成一步一重點的新版面",
+        "en": "Updated to the step-by-step layout"
+      },
+      "reformatOpenAction": {
+        "zh-TW": "打開筆記",
+        "en": "Open note"
+      },
+      "reformatFailureBanner": {
+        "zh-TW": "這次沒整理成功，原本的內容都還在，稍後可以再試一次。",
+        "en": "Couldn't rebuild this note right now. Your original note is safe, so try again in a bit."
+      },
+      "reformatErrorToast": {
+        "zh-TW": "這次沒整理成功，原本的內容都還在，稍後可以再試一次。",
+        "en": "Couldn't rebuild this note right now. Your original note is safe, so try again in a bit."
+      },
+      "reformatFailureToast": {
+        "zh-TW": "整理失敗",
+        "en": "Couldn't rebuild"
+      },
+      "reformatFailedBadge": {
+        "zh-TW": "整理失敗",
+        "en": "Couldn't format"
+      },
+      "reformatNoteDeleted": {
+        "zh-TW": "這篇筆記已經刪除，無法整理成新格式。",
+        "en": "This note was deleted, so it can't be rebuilt."
+      },
+      "reformatNoteDeletedDuring": {
+        "zh-TW": "整理期間這篇筆記已被刪除，新格式沒有存下來。",
+        "en": "This note was deleted while rebuilding, so nothing was saved."
+      },
+      "reformatNoteChangedDuring": {
+        "zh-TW": "整理期間這篇筆記有更新過，新格式沒有覆蓋上去。請重新載入後再試一次。",
+        "en": "This note changed while rebuilding, so the new layout wasn't saved. Reload and try again."
+      },
+      "reformatNoModel": {
+        "zh-TW": "還沒連上 AI。到設定連上 AI 後，就能整理成新格式。",
+        "en": "AI isn't connected yet. Connect AI in Settings to rebuild this note."
+      },
+      "reformatNoModelToast": {
+        "zh-TW": "還沒連上 AI",
+        "en": "AI isn't connected"
+      },
+      "reformatOpenSettings": {
+        "zh-TW": "打開設定",
+        "en": "Open Settings"
+      },
+      "reformatFailedTooltip": {
+        "zh-TW": "這次沒整理成步驟版面，已完整保留為舊版；可照常閱讀，或用原始內容再試一次。",
+        "en": "Couldn't format into steps, so the full note is kept in classic view. Read as is, or try again from the original source."
+      },
+      "reformatFailedTooltipRebuild": {
+        "zh-TW": "這次沒整理成步驟版面，已完整保留為舊版；可照常閱讀，或從「更多 › 整理成新格式」再試一次。",
+        "en": "Couldn't format into steps, so the full note is kept in classic view. Read as is, or retry in More › Rebuild in step-by-step view."
+      },
+      "reformatFailedHint": {
+        "zh-TW": "這次沒整理成步驟版面，已完整保留為舊版；可照常閱讀，或用原始內容再試一次。",
+        "en": "Couldn't format into steps, so the full note is kept in classic view. Read as is, or try again from the original source."
+      },
+      "reformatFailedSyncHeld": {
+        "zh-TW": "同步服務更新後，才會同步步驟版面與標示「整理失敗」的筆記；這些筆記暫留在本機，其他筆記照常同步。",
+        "en": "Update your sync server to sync step-by-step notes and notes marked \"Couldn't format.\" For now they stay on this device while other notes sync normally."
+      },
+      "viewSource": {
+        "zh-TW": "查看原始內容",
+        "en": "View original source"
+      },
+      "backToLesson": {
+        "zh-TW": "回到課程",
+        "en": "Back to lesson"
+      },
+      "exportMarkdown": {
+        "zh-TW": "匯出 Markdown",
+        "en": "Export Markdown"
+      },
+      "exportedToast": {
+        "zh-TW": "筆記已匯出為 Markdown",
+        "en": "Exported as Markdown"
+      },
+      "deleteLesson": {
+        "zh-TW": "刪除筆記",
+        "en": "Delete lesson"
+      },
+      "predictToggle": {
+        "zh-TW": "先想再看",
+        "en": "Think first"
+      },
+      "sendToPersonal": {
+        "zh-TW": "送到 Personal",
+        "en": "Send to Personal"
+      },
+      "sendToPr": {
+        "zh-TW": "送到 BELL PR",
+        "en": "Send to BELL PR"
+      },
+      "sendToPersonalUnavailableHint": {
+        "zh-TW": "尚未連結",
+        "en": "Not linked"
+      },
+      "toggleTheme": {
+        "zh-TW": "切換亮暗",
+        "en": "Switch theme"
+      },
+      "originalSource": {
+        "zh-TW": "原始內容",
+        "en": "Original source"
+      },
+      "backToExplanation": {
+        "zh-TW": "回到引導解說",
+        "en": "Back to lesson"
+      },
+      "exportedMarkdownToast": {
+        "zh-TW": "筆記已匯出為 Markdown",
+        "en": "Exported as Markdown"
+      }
+    },
+    "progress": {
+      "stripAria": {
+        "zh-TW": "進度：第 {current} 步，共 {total} 步",
+        "en": "Progress: step {current} of {total}"
+      },
+      "stepFraction": {
+        "zh-TW": "{current} / {total}",
+        "en": "{current} / {total}"
+      },
+      "recallFraction": {
+        "zh-TW": "回想 {done}/{total}",
+        "en": "Recall {done}/{total}"
+      }
+    },
+    "rail": {
+      "ariaLabel": {
+        "zh-TW": "段落與進度",
+        "en": "Steps and progress"
+      },
+      "wrapUpItem": {
+        "zh-TW": "整理",
+        "en": "Wrap-up"
+      },
+      "followUpsItem": {
+        "zh-TW": "延伸問題",
+        "en": "Go further"
+      },
+      "endRegionAria": {
+        "zh-TW": "整理與延伸",
+        "en": "Wrap-up and follow-ups"
+      },
+      "endRegionLegacyAria": {
+        "zh-TW": "延伸與來源",
+        "en": "Follow-ups and source"
+      },
+      "recallLabel": {
+        "zh-TW": "回想",
+        "en": "Recall"
+      },
+      "recallCount": {
+        "zh-TW": "{done} / {total}",
+        "en": "{done} / {total}"
+      },
+      "originalSource": {
+        "zh-TW": "原始內容",
+        "en": "Original source"
+      },
+      "backToExplanation": {
+        "zh-TW": "回到引導解說",
+        "en": "Back to lesson"
+      }
+    },
+    "opener": {
+      "stepsCount": {
+        "zh-TW": "{count} 步",
+        "en": "{count} steps"
+      },
+      "readingTime": {
+        "zh-TW": "約 {minutes} 分鐘",
+        "en": "{minutes} min read"
+      }
+    },
+    "step": {
+      "counter": {
+        "zh-TW": "{current} / {total}",
+        "en": "{current} / {total}"
+      },
+      "analogyAria": {
+        "zh-TW": "生活類比",
+        "en": "Everyday analogy"
+      },
+      "deeperSummaryPrefix": {
+        "zh-TW": "細節：{summary}",
+        "en": "Closer look: {summary}"
+      },
+      "pdfSinglePage": {
+        "zh-TW": "第 {page} 頁",
+        "en": "p. {page}"
+      },
+      "pdfPageRange": {
+        "zh-TW": "第 {start}–{end} 頁",
+        "en": "pp. {start}–{end}"
+      },
+      "pdfOpenPageTooltip": {
+        "zh-TW": "在 PDF 原文翻到第 {page} 頁",
+        "en": "Jump to page {page} in the source PDF"
+      }
+    },
+    "deleteDialog": {
+      "title": {
+        "zh-TW": "刪除這篇學習筆記？",
+        "en": "Delete this lesson?"
+      },
+      "body": {
+        "zh-TW": "「{title}」與它的複習進度都會移除，這個動作無法復原。",
+        "en": "“{title}” and its review progress will be removed. This can't be undone."
+      },
+      "keep": {
+        "zh-TW": "保留",
+        "en": "Keep"
+      },
+      "confirm": {
+        "zh-TW": "確認刪除",
+        "en": "Delete"
+      },
+      "deletedToast": {
+        "zh-TW": "已刪除筆記",
+        "en": "Lesson deleted"
+      },
+      "deleteErrorToast": {
+        "zh-TW": "刪除失敗",
+        "en": "Couldn't delete lesson"
+      }
+    },
+    "exportRelations": {
+      "linksTo": {
+        "zh-TW": "連向",
+        "en": "Links to"
+      },
+      "linkedFrom": {
+        "zh-TW": "連自",
+        "en": "Linked from"
+      },
+      "continues": {
+        "zh-TW": "延伸自",
+        "en": "Builds on"
+      },
+      "continuedBy": {
+        "zh-TW": "延伸到",
+        "en": "Extended by"
+      },
+      "sectionReasonJoin": {
+        "zh-TW": "{section}；{reason}",
+        "en": "{section}; {reason}"
+      }
+    }
+  },
+  "figures": {
+    "listSeparator": {
+      "zh-TW": "、",
+      "en": ", "
+    },
+    "kinds": {
+      "annotatedCode": {
+        "zh-TW": "標註程式",
+        "en": "Annotated code"
+      },
+      "state": {
+        "zh-TW": "狀態對照",
+        "en": "State changes"
+      },
+      "compare": {
+        "zh-TW": "比較",
+        "en": "Side by side"
+      },
+      "sequence": {
+        "zh-TW": "執行順序",
+        "en": "Run order"
+      },
+      "timeline": {
+        "zh-TW": "時間軸",
+        "en": "Timeline"
+      },
+      "keyfact": {
+        "zh-TW": "關鍵數字",
+        "en": "Key number"
+      },
+      "d2": {
+        "zh-TW": "結構關係圖",
+        "en": "Architecture map"
+      },
+      "rubik": {
+        "zh-TW": "互動立體圖解",
+        "en": "Interactive 3D cube"
+      }
+    },
+    "controls": {
+      "prevStepAria": {
+        "zh-TW": "上一步",
+        "en": "Previous step"
+      },
+      "nextStepAria": {
+        "zh-TW": "下一步",
+        "en": "Next step"
+      },
+      "position": {
+        "zh-TW": "{current} / {total}",
+        "en": "{current} / {total}"
+      },
+      "positionLiveAria": {
+        "zh-TW": "第 {current} 步，共 {total} 步",
+        "en": "Step {current} of {total}"
+      },
+      "blankPendingAria": {
+        "zh-TW": "待回答",
+        "en": "Blank to answer"
+      },
+      "blankPredictAria": {
+        "zh-TW": "先想想",
+        "en": "Take a guess"
+      },
+      "predictActiveCaption": {
+        "zh-TW": "先想再看開啟時，下一格會先挖空。",
+        "en": "When Think first is on, the next cell stays blank until you step forward."
+      }
+    },
+    "annotatedCode": {
+      "copyAria": {
+        "zh-TW": "複製程式碼",
+        "en": "Copy code"
+      },
+      "copiedAria": {
+        "zh-TW": "已複製程式碼",
+        "en": "Code copied"
+      },
+      "copyManualFallback": {
+        "zh-TW": "請直接選取程式碼手動複製。",
+        "en": "Select the code to copy it manually."
+      },
+      "codeRegionAria": {
+        "zh-TW": "{language} 程式碼",
+        "en": "{language} code"
+      },
+      "notePinAria": {
+        "zh-TW": "註解 {n}",
+        "en": "Note {n}"
+      },
+      "outputLabel": {
+        "zh-TW": "輸出",
+        "en": "Output"
+      }
+    },
+    "state": {
+      "headerSingleVar": {
+        "zh-TW": "逐步看 {var}",
+        "en": "Watch {var}"
+      },
+      "headerTwoVars": {
+        "zh-TW": "逐步看 {varA} 與 {varB}",
+        "en": "Watch {varA} & {varB}"
+      },
+      "headerManyVars": {
+        "zh-TW": "逐步看 {vars}",
+        "en": "Watch {vars}"
+      },
+      "regionAria": {
+        "zh-TW": "狀態對照：{vars} 隨每次操作改變。可用左右方向鍵逐步查看。",
+        "en": "State table: how {vars} changes at each moment. Use Left and Right arrows to step through."
+      },
+      "regionStaticAria": {
+        "zh-TW": "狀態對照：{vars} 隨每次操作改變。",
+        "en": "State table: how {vars} changes at each moment."
+      },
+      "colMoment": {
+        "zh-TW": "時刻",
+        "en": "When"
+      },
+      "colCode": {
+        "zh-TW": "程式",
+        "en": "Code"
+      },
+      "colOutput": {
+        "zh-TW": "輸出",
+        "en": "Output"
+      },
+      "emptyOutput": {
+        "zh-TW": "—",
+        "en": "—"
+      }
+    },
+    "compare": {
+      "misconceptionTitle": {
+        "zh-TW": "常見誤解",
+        "en": "Common myth"
+      },
+      "realityTitle": {
+        "zh-TW": "實際上",
+        "en": "In reality"
+      }
+    },
+    "sequence": {
+      "regionAria": {
+        "zh-TW": "執行順序：{lanes}。可用左右方向鍵逐步查看。",
+        "en": "Run order across {lanes}. Use Left and Right arrows to step through."
+      },
+      "regionStaticAria": {
+        "zh-TW": "執行順序：{lanes}。",
+        "en": "Run order across {lanes}."
+      },
+      "consoleLabel": {
+        "zh-TW": "輸出",
+        "en": "Output"
+      }
+    },
+    "d2": {
+      "regionAria": {
+        "zh-TW": "結構關係圖：{title}。可用左右方向鍵逐步檢視連線。",
+        "en": "Architecture map: {title}. Use Left and Right arrows to step through connections."
+      },
+      "regionStaticAria": {
+        "zh-TW": "結構關係圖：{title}。",
+        "en": "Architecture map: {title}."
+      },
+      "showSourceAria": {
+        "zh-TW": "檢視 D2 宣告語法",
+        "en": "View D2 declarative source"
+      },
+      "hideSourceAria": {
+        "zh-TW": "收合 D2 宣告語法",
+        "en": "Hide D2 declarative source"
+      },
+      "toggle3dAria": {
+        "zh-TW": "切換 3D 立體層次視角",
+        "en": "Toggle 3D layered relief view"
+      }
+    },
+    "timeline": {
+      "headerWithSpan": {
+        "zh-TW": "時間軸 · 等待 {span} {unit}",
+        "en": "Timeline · {span} {unit} wait"
+      },
+      "canceledRange": {
+        "zh-TW": "取消",
+        "en": "Canceled"
+      },
+      "fireAria": {
+        "zh-TW": "執行 {label}",
+        "en": "Runs {label}"
+      }
+    }
+  },
+  "recall": {
+    "title": {
+      "zh-TW": "回想",
+      "en": "Recall"
+    },
+    "hintButton": {
+      "zh-TW": "提示",
+      "en": "Hint"
+    },
+    "showAnswer": {
+      "zh-TW": "顯示答案",
+      "en": "Show answer"
+    },
+    "hideAnswer": {
+      "zh-TW": "收起答案",
+      "en": "Hide answer"
+    },
+    "buttons": {
+      "remembered": {
+        "zh-TW": "記得",
+        "en": "Got it"
+      },
+      "unsure": {
+        "zh-TW": "不確定",
+        "en": "Not sure"
+      }
+    },
+    "remembered": {
+      "zh-TW": "記得",
+      "en": "Got it"
+    },
+    "unsure": {
+      "zh-TW": "不確定",
+      "en": "Not sure"
+    },
+    "confirmation": {
+      "template": {
+        "zh-TW": "{verdict} · {next}",
+        "en": "{verdict} · {next}"
+      },
+      "verdict": {
+        "remembered": {
+          "zh-TW": "記得",
+          "en": "Got it"
+        },
+        "unsure": {
+          "zh-TW": "不確定",
+          "en": "Not sure"
+        }
+      },
+      "scheduled": {
+        "dueNow": {
+          "zh-TW": "待複習",
+          "en": "Due for review"
+        },
+        "minutes": {
+          "zh-TW": "{n} 分鐘後再問",
+          "en": "Back in {n} min"
+        },
+        "hours": {
+          "zh-TW": "{n} 小時後再問",
+          "en": "Back in {n} hr"
+        },
+        "todayAt": {
+          "zh-TW": "今天 {time} 再問",
+          "en": "Back today at {time}"
+        },
+        "today": {
+          "zh-TW": "今天稍後再問",
+          "en": "Back later today"
+        },
+        "tomorrowAt": {
+          "zh-TW": "明天 {time} 再問",
+          "en": "Back tomorrow at {time}"
+        },
+        "tomorrow": {
+          "zh-TW": "明天再問",
+          "en": "Back tomorrow"
+        },
+        "days": {
+          "zh-TW": "{n} 天後再問",
+          "en": "Back in {n} days"
+        }
+      },
+      "waiting": {
+        "zh-TW": "之後開始複習",
+        "en": "Reviews start later"
+      },
+      "demo": {
+        "zh-TW": "示範課程不排入複習",
+        "en": "Demo lessons aren't queued"
+      },
+      "byRating": {
+        "remembered": {
+          "dueNow": {
+            "zh-TW": "記得 · 待複習",
+            "en": "Got it · Due for review"
+          },
+          "minutes": {
+            "zh-TW": "記得 · {n} 分鐘後再問",
+            "en": "Got it · Back in {n} min"
+          },
+          "hours": {
+            "zh-TW": "記得 · {n} 小時後再問",
+            "en": "Got it · Back in {n} hr"
+          },
+          "todayAt": {
+            "zh-TW": "記得 · 今天 {time} 再問",
+            "en": "Got it · Back today at {time}"
+          },
+          "today": {
+            "zh-TW": "記得 · 今天稍後再問",
+            "en": "Got it · Back later today"
+          },
+          "tomorrowAt": {
+            "zh-TW": "記得 · 明天 {time} 再問",
+            "en": "Got it · Back tomorrow at {time}"
+          },
+          "tomorrowScheduled": {
+            "zh-TW": "記得 · 明天再問",
+            "en": "Got it · Back tomorrow"
+          },
+          "days": {
+            "zh-TW": "記得 · {n} 天後再問",
+            "en": "Got it · Back in {n} days"
+          },
+          "waiting": {
+            "zh-TW": "記得 · 之後開始複習",
+            "en": "Got it · Reviews start later"
+          },
+          "demo": {
+            "zh-TW": "記得 · 示範課程不排入複習",
+            "en": "Got it · Demo lessons aren't queued"
+          }
+        },
+        "unsure": {
+          "dueNow": {
+            "zh-TW": "不確定 · 待複習",
+            "en": "Not sure · Due for review"
+          },
+          "minutes": {
+            "zh-TW": "不確定 · {n} 分鐘後再問",
+            "en": "Not sure · Back in {n} min"
+          },
+          "hours": {
+            "zh-TW": "不確定 · {n} 小時後再問",
+            "en": "Not sure · Back in {n} hr"
+          },
+          "todayAt": {
+            "zh-TW": "不確定 · 今天 {time} 再問",
+            "en": "Not sure · Back today at {time}"
+          },
+          "today": {
+            "zh-TW": "不確定 · 今天稍後再問",
+            "en": "Not sure · Back later today"
+          },
+          "tomorrowAt": {
+            "zh-TW": "不確定 · 明天 {time} 再問",
+            "en": "Not sure · Back tomorrow at {time}"
+          },
+          "tomorrowScheduled": {
+            "zh-TW": "不確定 · 明天再問",
+            "en": "Not sure · Back tomorrow"
+          },
+          "days": {
+            "zh-TW": "不確定 · {n} 天後再問",
+            "en": "Not sure · Back in {n} days"
+          },
+          "demo": {
+            "zh-TW": "不確定 · 示範課程不排入複習",
+            "en": "Not sure · Demo lessons aren't queued"
+          }
+        }
+      }
+    },
+    "waitingTooltip": {
+      "zh-TW": "今天的新題目已滿，這題已記下，之後再排進複習。",
+      "en": "You've reached today's new-card limit. Saved for a later review."
+    },
+    "saveError": {
+      "zh-TW": "沒存到剛才的作答，再點一次試試。",
+      "en": "Couldn't save your answer. Try again."
+    },
+    "stepGoneError": {
+      "zh-TW": "這篇筆記剛更新過，重新載入後再回答。",
+      "en": "This lesson was just updated. Reload to answer."
+    }
+  },
+  "wrapUp": {
+    "heading": {
+      "zh-TW": "整理",
+      "en": "Wrap-up"
+    },
+    "statusRemembered": {
+      "zh-TW": "記得",
+      "en": "Got it"
+    },
+    "statusUnsure": {
+      "zh-TW": "不確定",
+      "en": "Not sure"
+    },
+    "statusWaiting": {
+      "zh-TW": "之後開始複習",
+      "en": "Starts later"
+    },
+    "statusUnanswered": {
+      "zh-TW": "未回想",
+      "en": "Not tried"
+    },
+    "followUpsHeading": {
+      "zh-TW": "延伸問題",
+      "en": "Go further"
+    },
+    "extendToNote": {
+      "zh-TW": "延伸成新筆記",
+      "en": "Turn into a new lesson"
+    },
+    "selfCheck": {
+      "writeAnswerToggle": {
+        "zh-TW": "試著自己寫寫看",
+        "en": "Try writing your own answer"
+      },
+      "answerPlaceholder": {
+        "zh-TW": "用自己的話寫就好。卡住也沒關係，寫下哪裡不確定。",
+        "en": "Put it in your own words. Stuck? Jot down the part that feels fuzzy."
+      },
+      "compareReference": {
+        "zh-TW": "對照參考答案",
+        "en": "Compare with answer"
+      },
+      "peekReference": {
+        "zh-TW": "直接看參考答案",
+        "en": "Peek at answer"
+      },
+      "gradeWithAi": {
+        "zh-TW": "請 AI 幫忙看答案",
+        "en": "Check my answer"
+      },
+      "sendingStage": {
+        "zh-TW": "正在對照你的答案…",
+        "en": "Checking your answer…"
+      },
+      "modelDisconnectedOnce": {
+        "zh-TW": "還沒連上 AI：你可以先寫下想法，到設定連上 AI 後就能幫忙對照。",
+        "en": "AI isn't connected yet. Jot down your thoughts now, or connect AI in Settings for feedback."
+      },
+      "verdictCorrect": {
+        "zh-TW": "抓到重點了",
+        "en": "Spot on"
+      },
+      "verdictPartial": {
+        "zh-TW": "對了一半",
+        "en": "Partly there"
+      },
+      "verdictIncorrect": {
+        "zh-TW": "還沒對上",
+        "en": "Not quite"
+      },
+      "verdictUnanswered": {
+        "zh-TW": "直接看了答案",
+        "en": "Checked answer"
+      },
+      "tryAgain": {
+        "zh-TW": "重新寫一次",
+        "en": "Try again"
+      },
+      "heading": {
+        "zh-TW": "延伸問題",
+        "en": "Go further"
+      }
+    },
+    "nextReadsHeading": {
+      "zh-TW": "接著讀",
+      "en": "Read next"
+    },
+    "nextReadsShowMore": {
+      "zh-TW": "顯示另外 {count} 篇相關筆記",
+      "en": "Show {count} more related lessons"
+    },
+    "nextReadsShowLess": {
+      "zh-TW": "收起",
+      "en": "Show less"
+    },
+    "sourcePrefix": {
+      "zh-TW": "來源：{label}",
+      "en": "Source: {label}"
+    },
+    "sourceOriginalLink": {
+      "zh-TW": "原始內容",
+      "en": "Original text"
+    },
+    "sourceExternalLink": {
+      "zh-TW": "開啟原始網頁",
+      "en": "Open original page"
+    },
+    "sourceTruncatedNote": {
+      "zh-TW": "原文較長，這堂課僅整理前半段內容。",
+      "en": "The source was long, so this lesson covers the first part."
+    }
+  },
+  "review": {
+    "pageTitle": {
+      "zh-TW": "複習",
+      "en": "Review"
+    },
+    "exitAria": {
+      "zh-TW": "結束複習",
+      "en": "Exit review"
+    },
+    "moreActionsAria": {
+      "zh-TW": "更多操作",
+      "en": "More actions"
+    },
+    "progressAria": {
+      "zh-TW": "複習進度",
+      "en": "Review progress"
+    },
+    "position": {
+      "zh-TW": "{current} / {total}",
+      "en": "{current} / {total}"
+    },
+    "sourceChip": {
+      "zh-TW": "{lessonTitle} · 第 {step} 步",
+      "en": "{lessonTitle} · Step {step}"
+    },
+    "sourceChipCategory": {
+      "zh-TW": "{category} · {lessonTitle}",
+      "en": "{category} · {lessonTitle}"
+    },
+    "kindRecall": {
+      "zh-TW": "回想",
+      "en": "Recall"
+    },
+    "kindSectionLegacy": {
+      "zh-TW": "段落回想",
+      "en": "Section"
+    },
+    "kindTermLegacy": {
+      "zh-TW": "詞句填空",
+      "en": "Fill in"
+    },
+    "kindCheckLegacy": {
+      "zh-TW": "自我檢查",
+      "en": "Self-check"
+    },
+    "promptSectionLegacy": {
+      "zh-TW": "這一段在講什麼？",
+      "en": "What is this section about?"
+    },
+    "promptTermMeaning": {
+      "zh-TW": "「{term}」在這段裡是什麼意思？",
+      "en": "What does “{term}” mean here?"
+    },
+    "newCardBadge": {
+      "zh-TW": "新卡",
+      "en": "New"
+    },
+    "hintButton": {
+      "zh-TW": "提示",
+      "en": "Hint"
+    },
+    "hintAria": {
+      "zh-TW": "提示",
+      "en": "Hint"
+    },
+    "showAnswer": {
+      "zh-TW": "顯示答案",
+      "en": "Show answer"
+    },
+    "shortcutSpace": {
+      "zh-TW": "Space",
+      "en": "Space"
+    },
+    "backToStep": {
+      "zh-TW": "回到這一步",
+      "en": "Jump to this step"
+    },
+    "backToSectionLegacy": {
+      "zh-TW": "回到筆記這一段",
+      "en": "Jump to this section"
+    },
+    "gradesGroupAria": {
+      "zh-TW": "評分",
+      "en": "Rate your recall"
+    },
+    "grades": {
+      "again": {
+        "zh-TW": "重來",
+        "en": "Again"
+      },
+      "againHint": {
+        "zh-TW": "想不起來",
+        "en": "Didn't remember"
+      },
+      "hard": {
+        "zh-TW": "困難",
+        "en": "Hard"
+      },
+      "hardHint": {
+        "zh-TW": "想了一下才想起",
+        "en": "Took some effort"
+      },
+      "good": {
+        "zh-TW": "良好",
+        "en": "Good"
+      },
+      "goodHint": {
+        "zh-TW": "想起來了",
+        "en": "Remembered"
+      },
+      "easy": {
+        "zh-TW": "簡單",
+        "en": "Easy"
+      },
+      "easyHint": {
+        "zh-TW": "一看就會",
+        "en": "Instant recall"
+      }
+    },
+    "intervals": {
+      "oneMinute": {
+        "zh-TW": "1 分鐘",
+        "en": "1 min"
+      },
+      "minutes": {
+        "zh-TW": "{n} 分鐘",
+        "en": "{n} min"
+      },
+      "oneHour": {
+        "zh-TW": "1 小時",
+        "en": "1 hr"
+      },
+      "hours": {
+        "zh-TW": "{n} 小時",
+        "en": "{n} hr"
+      },
+      "oneDay": {
+        "zh-TW": "1 天",
+        "en": "1 day"
+      },
+      "days": {
+        "zh-TW": "{n} 天",
+        "en": "{n} days"
+      },
+      "daysLong": {
+        "zh-TW": "{n} 天",
+        "en": "{n} days"
+      },
+      "oneDayLong": {
+        "zh-TW": "1 天",
+        "en": "1 day"
+      },
+      "oneMonth": {
+        "zh-TW": "1 個月",
+        "en": "1 mo"
+      },
+      "months": {
+        "zh-TW": "{n} 個月",
+        "en": "{n} mo"
+      },
+      "oneYear": {
+        "zh-TW": "1 年",
+        "en": "1 yr"
+      },
+      "years": {
+        "zh-TW": "{n} 年",
+        "en": "{n} yr"
+      },
+      "afterLegacy": {
+        "zh-TW": "{interval}後",
+        "en": "in {interval}"
+      }
+    }
+  },
+  "states": {
+    "lesson": {
+      "loading": {
+        "zh-TW": "正在打開這堂課…",
+        "en": "Opening lesson…"
+      },
+      "generatingTitle": {
+        "zh-TW": "正在整理成一步一重點…",
+        "en": "Breaking this down step by step…"
+      },
+      "generatingBody": {
+        "zh-TW": "先抓出核心答案，再補上圖解和回想題，大約十幾秒。",
+        "en": "Pulling out the core answer, visuals, and recall questions. Just a few seconds."
+      },
+      "emptyTitle": {
+        "zh-TW": "還沒有打開任何課程",
+        "en": "No lesson open yet"
+      },
+      "emptyBody": {
+        "zh-TW": "貼上一段程式碼、文章或 PDF，就能整理成好讀的步驟筆記。",
+        "en": "Drop in code, an article, or a PDF to turn it into a clear, step-by-step lesson."
+      },
+      "emptyAction": {
+        "zh-TW": "建立第一堂課",
+        "en": "Create a lesson"
+      },
+      "notFoundTitle": {
+        "zh-TW": "找不到這堂課",
+        "en": "Can't find this lesson"
+      },
+      "notFoundBody": {
+        "zh-TW": "這篇筆記可能已經刪除，試試從知識庫打開其他內容。",
+        "en": "It may have been deleted. Try opening another lesson from your Library."
+      },
+      "loadErrorTitle": {
+        "zh-TW": "這堂課暫時打不開",
+        "en": "Couldn't open this lesson"
+      },
+      "loadErrorBody": {
+        "zh-TW": "讀取時出了點狀況，請重新載入再試一次。",
+        "en": "Something went wrong while loading. Give it another try."
+      },
+      "retryAction": {
+        "zh-TW": "重新載入",
+        "en": "Try again"
+      },
+      "libraryAction": {
+        "zh-TW": "返回知識庫",
+        "en": "Back to Library"
+      }
+    },
+    "review": {
+      "loading": {
+        "zh-TW": "正在整理今天要複習的題目…",
+        "en": "Gathering today's review cards…"
+      },
+      "emptyDueTitle": {
+        "zh-TW": "今天沒有到期的複習",
+        "en": "All caught up for today"
+      },
+      "emptyDueBody": {
+        "zh-TW": "學過的內容都還在記憶週期裡。想學點新的，去知識庫逛逛吧。",
+        "en": "Everything you've learned is still fresh. Ready to explore something new?"
+      },
+      "emptyFirstRunTitle": {
+        "zh-TW": "還沒有複習題目",
+        "en": "No review cards yet"
+      },
+      "emptyFirstRunBody": {
+        "zh-TW": "讀課時回答每步結尾的「回想」，題目就會自動收進這裡。",
+        "en": "Answer a recall question at the end of any lesson step and it'll show up here."
+      },
+      "openLibraryAction": {
+        "zh-TW": "前往知識庫",
+        "en": "Open Library"
+      },
+      "doneTitle": {
+        "zh-TW": "今天的 {total} 題都複習完了。",
+        "en": "All {total} cards done for today."
+      },
+      "doneTitleOne": {
+        "zh-TW": "今天的 1 題複習完了。",
+        "en": "1 card done for today."
+      },
+      "doneBodyClean": {
+        "zh-TW": "記得的會拉長間隔，還不熟的會早一點回來找你。",
+        "en": "What sticks will space out; trickier ones will come back sooner."
+      },
+      "doneBodyWithAgain": {
+        "zh-TW": "其中 {again} 題選了「重來」，過幾分鐘會再出現。",
+        "en": "You marked {again} cards as Again, so they'll come back in a few minutes."
+      },
+      "doneBodyWithAgainOne": {
+        "zh-TW": "其中 1 題選了「重來」，過幾分鐘會再出現。",
+        "en": "You marked 1 card as Again, so it'll come back in a few minutes."
+      },
+      "donePracticeRemaining": {
+        "zh-TW": "再練剛學的 {remaining} 題",
+        "en": "Review {remaining} cards due now"
+      },
+      "donePracticeRemainingOne": {
+        "zh-TW": "再練剛學的 1 題",
+        "en": "Review 1 card due now"
+      },
+      "doneBackHome": {
+        "zh-TW": "回到首頁",
+        "en": "Back to Home"
+      },
+      "loadError": {
+        "zh-TW": "暫時載入不了複習題目，請再試一次。",
+        "en": "Couldn't load your review cards. Try again."
+      },
+      "rateError": {
+        "zh-TW": "評分沒存成功，請再按一次。",
+        "en": "Couldn't save your rating. Try again."
+      },
+      "cardRemovedSkipped": {
+        "zh-TW": "這題對應的步驟已經移除，已自動略過。",
+        "en": "That step was removed from the lesson, so this card was skipped."
+      },
+      "reloadAction": {
+        "zh-TW": "重新載入",
+        "en": "Reload"
+      }
+    },
+    "componentsGallery": {
+      "pageTitle": {
+        "zh-TW": "圖解元件",
+        "en": "Visual Components"
+      },
+      "backToLessonAria": {
+        "zh-TW": "回到課程範例",
+        "en": "Back to sample lesson"
+      },
+      "intro": {
+        "zh-TW": "六種圖解取代方塊流程圖。每一種都是文字、表格與清單，可以選取、可以被讀屏器讀出，亮暗兩種主題共用同一組色彩變數。每一步最多一張。",
+        "en": "Six structured visuals replace node-and-arrow diagrams. Every visual is plain text, tables, and lists—selectable, screen-reader friendly, and themed with one shared token set. At most one per step."
+      },
+      "specFits": {
+        "zh-TW": "適合",
+        "en": "Best for"
+      },
+      "specFields": {
+        "zh-TW": "欄位",
+        "en": "Fields"
+      }
+    }
+  },
+  "suite": {
+    "apps": {
+      "personal": {
+        "name": {
+          "zh-TW": "BELL Personal",
+          "en": "BELL Personal"
+        },
+        "summary": {
+          "zh-TW": "今日與收件匣",
+          "en": "Today and inbox"
+        }
+      },
+      "explain": {
+        "name": {
+          "zh-TW": "BELL Explain",
+          "en": "BELL Explain"
+        },
+        "summary": {
+          "zh-TW": "理解與複習",
+          "en": "Understanding and review"
+        }
+      },
+      "pr": {
+        "name": {
+          "zh-TW": "BELL PR",
+          "en": "BELL PR"
+        },
+        "summary": {
+          "zh-TW": "貢獻與審查",
+          "en": "Contributions and review"
+        }
+      }
+    },
+    "switcher": {
+      "label": {
+        "zh-TW": "切換 BELL 產品",
+        "en": "Switch BELL products"
+      },
+      "heading": {
+        "zh-TW": "BELL 產品",
+        "en": "BELL products"
+      },
+      "menuLabel": {
+        "zh-TW": "BELL 產品",
+        "en": "BELL products"
+      },
+      "searchPlaceholder": {
+        "zh-TW": "切換到…",
+        "en": "Switch to…"
+      },
+      "empty": {
+        "zh-TW": "沒有符合的產品。",
+        "en": "No matching products."
+      },
+      "current": {
+        "zh-TW": "目前",
+        "en": "Current"
+      },
+      "unlinked": {
+        "zh-TW": "尚未連結",
+        "en": "Not linked"
+      },
+      "loading": {
+        "zh-TW": "正在載入產品清單…",
+        "en": "Loading BELL products…"
+      },
+      "failed": {
+        "zh-TW": "無法載入產品清單",
+        "en": "Couldn't load BELL products"
+      },
+      "retry": {
+        "zh-TW": "重試",
+        "en": "Try again"
+      }
+    },
+    "handoff": {
+      "bannerAria": {
+        "zh-TW": "交接草稿來源",
+        "en": "Draft source"
+      },
+      "checking": {
+        "zh-TW": "正在確認交接來源…",
+        "en": "Checking draft source…"
+      },
+      "defaultSource": {
+        "zh-TW": "BELL Explain",
+        "en": "BELL Explain"
+      },
+      "dismissErrorAria": {
+        "zh-TW": "關閉交接錯誤提示",
+        "en": "Dismiss draft notice"
+      },
+      "dismissErrorTitle": {
+        "zh-TW": "關閉",
+        "en": "Dismiss"
+      },
+      "truncated": {
+        "zh-TW": "內容過長，已截斷為前 2,000 字",
+        "en": "Long text was trimmed to the first 2,000 characters"
+      },
+      "back": {
+        "zh-TW": "回到 {name}",
+        "en": "Back to {name}"
+      },
+      "fromApp": {
+        "zh-TW": "來自 {name}",
+        "en": "From {name}"
+      },
+      "fromAppKind": {
+        "zh-TW": "來自 {name} · {kind}",
+        "en": "From {name} · {kind}"
+      },
+      "fromAppTitle": {
+        "zh-TW": "來自 {name}「{title}」",
+        "en": "From {name} “{title}”"
+      },
+      "fromAppKindTitle": {
+        "zh-TW": "來自 {name} · {kind}「{title}」",
+        "en": "From {name} · {kind} “{title}”"
+      },
+      "kinds": {
+        "task": {
+          "zh-TW": "待辦",
+          "en": "task"
+        },
+        "idea": {
+          "zh-TW": "靈感",
+          "en": "idea"
+        },
+        "email": {
+          "zh-TW": "郵件",
+          "en": "email"
+        },
+        "event": {
+          "zh-TW": "行程",
+          "en": "event"
+        },
+        "note": {
+          "zh-TW": "筆記",
+          "en": "note"
+        }
+      },
+      "errors": {
+        "duplicateFields": {
+          "zh-TW": "交接網址有重複欄位，請重新發起。",
+          "en": "This link had duplicate fields. Please try again from the source app."
+        },
+        "missingText": {
+          "zh-TW": "交接網址沒有草稿文字，請重新發起。",
+          "en": "This link didn't include any text. Please try again from the source app."
+        },
+        "unlinkedSource": {
+          "zh-TW": "交接來源未連結或無法辨識，請重新發起。",
+          "en": "The source app isn't linked or recognized. Please try again from a linked app."
+        },
+        "emptyText": {
+          "zh-TW": "交接草稿沒有可讀取的文字。",
+          "en": "This draft didn't contain any readable text."
+        }
+      },
+      "composerAria": {
+        "zh-TW": "建立學習解說",
+        "en": "Create an explanation"
+      },
+      "draftInputAria": {
+        "zh-TW": "編輯交接草稿",
+        "en": "Edit draft text"
+      },
+      "draftPlaceholder": {
+        "zh-TW": "問一個問題，或貼上文字、連結",
+        "en": "Ask a question, or paste text or a link"
+      },
+      "startExplain": {
+        "zh-TW": "開始解釋",
+        "en": "Start explaining"
+      },
+      "startingExplain": {
+        "zh-TW": "正在整理理解",
+        "en": "Explaining…"
+      },
+      "discard": {
+        "zh-TW": "捨棄",
+        "en": "Discard"
+      },
+      "untitledFallback": {
+        "zh-TW": "新的解說",
+        "en": "New explanation"
+      },
+      "toPersonal": {
+        "dialogTitle": {
+          "zh-TW": "送到 Personal",
+          "en": "Send to Personal"
+        },
+        "openDraft": {
+          "zh-TW": "開啟待辦草稿",
+          "en": "Open task draft"
+        },
+        "discard": {
+          "zh-TW": "捨棄",
+          "en": "Discard"
+        },
+        "unlinked": {
+          "zh-TW": "尚未連結",
+          "en": "Not linked"
+        },
+        "sourceReview": {
+          "zh-TW": "BELL Explain · 複習「{title}」",
+          "en": "BELL Explain · review “{title}”"
+        },
+        "sourceNote": {
+          "zh-TW": "BELL Explain · 筆記《{title}》",
+          "en": "BELL Explain · note “{title}”"
+        },
+        "sourceSelection": {
+          "zh-TW": "BELL Explain · 筆記《{title}》 · 選取文字",
+          "en": "BELL Explain · note “{title}” · selection"
+        },
+        "prefillReviewTitle": {
+          "zh-TW": "複習《{title}》",
+          "en": "Review “{title}”"
+        },
+        "prefillNoteTitle": {
+          "zh-TW": "跟進學習筆記《{title}》",
+          "en": "Follow up on “{title}”"
+        }
+      }
+    }
+  },
+  "home": {
+    "intro": {
+      "eyebrow": {
+        "zh-TW": "A LITTLE CURIOSITY, A LOT OF POSSIBILITY",
+        "en": "A LITTLE CURIOSITY, A LOT OF POSSIBILITY"
+      },
+      "titleLine1": {
+        "zh-TW": "讓每一個「為什麼」，",
+        "en": "Give every “why”"
+      },
+      "titlePrefix": {
+        "zh-TW": "都有",
+        "en": ""
+      },
+      "titleHighlight": {
+        "zh-TW": "看得懂的答案",
+        "en": "an answer that clicks"
+      },
+      "titleSuffix": {
+        "zh-TW": "。",
+        "en": "."
+      },
+      "subtitle": {
+        "zh-TW": "貼上程式碼、文章，或上傳一份文件。從第一次理解，到下一次想起。",
+        "en": "Paste code or an article, or upload a document. From first understanding to next recall."
+      }
+    },
+    "composer": {
+      "ariaLabel": {
+        "zh-TW": "建立學習解說",
+        "en": "Create an explanation"
+      },
+      "tabsAria": {
+        "zh-TW": "內容類型",
+        "en": "Source type"
+      },
+      "parentBanner": {
+        "zh-TW": "延伸自《{title}》：會沿用原來源，並從那篇筆記接著講。",
+        "en": "Continuing from “{title}”: uses the same source and picks up where that lesson left off."
+      },
+      "clearParentAria": {
+        "zh-TW": "取消延伸，改為獨立的新筆記",
+        "en": "Stop continuing and start a standalone lesson"
+      },
+      "clearParentTitle": {
+        "zh-TW": "改為獨立的新筆記",
+        "en": "Start as a standalone lesson"
+      },
+      "clearInputAria": {
+        "zh-TW": "清除輸入",
+        "en": "Clear input"
+      },
+      "sampleBadge": {
+        "zh-TW": "人工編寫的示範內容",
+        "en": "Handcrafted sample"
+      },
+      "charCount": {
+        "zh-TW": "{count} / {limit}",
+        "en": "{count} / {limit}"
+      },
+      "focusAria": {
+        "zh-TW": "想弄懂的重點",
+        "en": "What to focus on"
+      },
+      "focusPlaceholder": {
+        "zh-TW": "想弄懂的重點（選填）",
+        "en": "What to focus on (optional)"
+      },
+      "modes": {
+        "code": {
+          "label": {
+            "zh-TW": "程式碼",
+            "en": "Code"
+          },
+          "placeholder": {
+            "zh-TW": "貼上程式碼",
+            "en": "Paste code"
+          },
+          "inputAria": {
+            "zh-TW": "輸入程式碼",
+            "en": "Code to explain"
+          },
+          "focusPlaceholder": {
+            "zh-TW": "想弄懂的重點，例如某一行或資料流向（選填）",
+            "en": "What to focus on, e.g. a tricky line or data flow (optional)"
+          }
+        },
+        "repo": {
+          "label": {
+            "zh-TW": "GitHub Repo",
+            "en": "GitHub Repo"
+          },
+          "labelCompact": {
+            "zh-TW": "Repo",
+            "en": "Repo"
+          },
+          "placeholder": {
+            "zh-TW": "https://github.com/owner/repository",
+            "en": "https://github.com/owner/repository"
+          },
+          "inputAria": {
+            "zh-TW": "輸入 GitHub Repo",
+            "en": "GitHub repository link"
+          },
+          "focusAria": {
+            "zh-TW": "想了解 Repo 的什麼",
+            "en": "What to explore in this repo"
+          },
+          "focusPlaceholder": {
+            "zh-TW": "想了解什麼？例如：請追蹤使用者登入的資料流程",
+            "en": "What would you like to trace? e.g. How sign-in data flows"
+          },
+          "indexedSelectedHint": {
+            "zh-TW": "已選用固定版本的 Repo 索引",
+            "en": "Using a pinned repo snapshot"
+          },
+          "indexFirstHint": {
+            "zh-TW": "先索引完整檔案樹，再為你的問題找出相關內容",
+            "en": "Indexes the file tree first, then pulls in the parts that match your question"
+          },
+          "manageIndexAction": {
+            "zh-TW": "管理 Repo 索引",
+            "en": "Manage Repo Index"
+          }
+        },
+        "document": {
+          "label": {
+            "zh-TW": "檔案",
+            "en": "File"
+          },
+          "placeholder": {
+            "zh-TW": "上傳文件",
+            "en": "Upload a file"
+          },
+          "inputAria": {
+            "zh-TW": "選擇要解釋的檔案",
+            "en": "Choose a file to explain"
+          },
+          "focusLabel": {
+            "zh-TW": "這份文件，你想先看懂什麼？",
+            "en": "What would you like to understand first?"
+          },
+          "focusOptionalTag": {
+            "zh-TW": "選填",
+            "en": "Optional"
+          },
+          "focusPlaceholder": {
+            "zh-TW": "例如：用白話解釋整體架構，搭配一個小案例；或整理規格中的必要條件與例外情況。",
+            "en": "e.g. Walk through the overall design with a short example, or list the key rules and edge cases."
+          }
+        },
+        "article": {
+          "label": {
+            "zh-TW": "文章",
+            "en": "Article"
+          },
+          "placeholder": {
+            "zh-TW": "貼上文章內容",
+            "en": "Paste article text"
+          },
+          "inputAria": {
+            "zh-TW": "輸入文章",
+            "en": "Article text"
+          },
+          "focusPlaceholder": {
+            "zh-TW": "想弄懂的重點，例如核心論點或專有名詞（選填）",
+            "en": "What to focus on, e.g. the main argument or key terms (optional)"
+          }
+        },
+        "concept": {
+          "label": {
+            "zh-TW": "概念",
+            "en": "Concept"
+          },
+          "placeholder": {
+            "zh-TW": "問一個問題",
+            "en": "Ask a question"
+          },
+          "inputAria": {
+            "zh-TW": "輸入概念",
+            "en": "Concept or question"
+          },
+          "focusPlaceholder": {
+            "zh-TW": "想搭配哪種情境或例子理解？（選填）",
+            "en": "Any context or example you'd like to use? (optional)"
+          }
+        },
+        "url": {
+          "label": {
+            "zh-TW": "網址",
+            "en": "Link"
+          },
+          "placeholder": {
+            "zh-TW": "https://...",
+            "en": "https://..."
+          },
+          "inputAria": {
+            "zh-TW": "輸入網址",
+            "en": "Web page link"
+          },
+          "focusPlaceholder": {
+            "zh-TW": "想從這個網頁看懂什麼？（選填）",
+            "en": "What to focus on from this page (optional)"
+          }
+        }
+      },
+      "depth": {
+        "labelAria": {
+          "zh-TW": "解說深度",
+          "en": "Explanation depth"
+        },
+        "beginner": {
+          "zh-TW": "從零開始",
+          "en": "Start from scratch"
+        },
+        "beginnerHint": {
+          "zh-TW": "先建立直覺：術語和縮寫第一次出現就解釋，步驟拆小，先給例子再歸納。",
+          "en": "Builds intuition first: explains new terms right away, keeps steps small, and leads with examples."
+        },
+        "intermediate": {
+          "zh-TW": "我有些基礎",
+          "en": "I know the basics"
+        },
+        "intermediateHint": {
+          "zh-TW": "假設懂基本語法與名詞，補上不變量、邊界條件、時間／空間複雜度與實際格式。",
+          "en": "Skips basic syntax and covers invariants, edge cases, time and space complexity, and real formats."
+        },
+        "advanced": {
+          "zh-TW": "深入原理",
+          "en": "Go in depth"
+        },
+        "advancedHint": {
+          "zh-TW": "加入正確性與最佳性論證、設計取捨、效能細節與失敗模式。",
+          "en": "Adds correctness reasoning, design trade-offs, performance details, and failure modes."
+        }
+      },
+      "submit": {
+        "zh-TW": "開始解釋",
+        "en": "Start explaining"
+      },
+      "submitSample": {
+        "zh-TW": "體驗這段解說",
+        "en": "Try this sample"
+      },
+      "generating": {
+        "zh-TW": "正在整理理解",
+        "en": "Explaining…"
+      },
+      "discard": {
+        "zh-TW": "捨棄",
+        "en": "Discard"
+      }
+    },
+    "document": {
+      "dropTitle": {
+        "zh-TW": "把講義、規格書或技術文件放進來",
+        "en": "Drop in slides, specs, or study notes"
+      },
+      "dropSubtitle": {
+        "zh-TW": "拖曳檔案至此，或選擇電腦中的檔案。",
+        "en": "Drag a file here, or choose one from your computer."
+      },
+      "chooseAction": {
+        "zh-TW": "選擇檔案",
+        "en": "Choose file"
+      },
+      "formatsHint": {
+        "zh-TW": "PDF、Word、PowerPoint、TXT、Markdown · 每份上限 {maxMb} MB",
+        "en": "PDF, Word, PowerPoint, TXT, Markdown · Up to {maxMb} MB"
+      },
+      "readingNote": {
+        "zh-TW": "PDF 最多解析 {maxPages} 頁、簡報 {maxSlides} 張。可指定頁碼或章節；長範圍會依你的問題選取相關段落，並標示解說範圍。掃描頁與圖表可附上頁面影像讓模型閱讀。",
+        "en": "Up to {maxPages} PDF pages or {maxSlides} slides. Pick pages or chapters; longer ranges focus on passages matching your question. Scanned pages and charts can include page images."
+      },
+      "uploadingTitle": {
+        "zh-TW": "正在上傳與擷取文字",
+        "en": "Uploading and reading text…"
+      },
+      "uploadingDetail": {
+        "zh-TW": "讀取頁面與章節，保留可回查的來源位置。",
+        "en": "Reading pages and chapters while keeping source page references."
+      },
+      "cancelUpload": {
+        "zh-TW": "取消",
+        "en": "Cancel"
+      },
+      "removeFileAria": {
+        "zh-TW": "移除已上傳的檔案",
+        "en": "Remove uploaded file"
+      },
+      "removeFileTitle": {
+        "zh-TW": "移除檔案",
+        "en": "Remove file"
+      },
+      "readyStatus": {
+        "zh-TW": "文字已準備好",
+        "en": "Text ready"
+      },
+      "replaceFileAction": {
+        "zh-TW": "更換檔案",
+        "en": "Replace file"
+      },
+      "summaryMeta": {
+        "zh-TW": "{format} · {size} · 已擷取 {parsed} / {total} {unit} · {chars} 字元",
+        "en": "{format} · {size} · Read {parsed} of {total} {unit} · {chars} chars"
+      },
+      "units": {
+        "page": {
+          "zh-TW": "頁",
+          "en": "pages"
+        },
+        "pageOne": {
+          "zh-TW": "頁",
+          "en": "page"
+        },
+        "slide": {
+          "zh-TW": "張投影片",
+          "en": "slides"
+        },
+        "slideOne": {
+          "zh-TW": "張投影片",
+          "en": "slide"
+        },
+        "section": {
+          "zh-TW": "段",
+          "en": "sections"
+        },
+        "sectionOne": {
+          "zh-TW": "段",
+          "en": "section"
+        }
+      },
+      "scopeLegend": {
+        "zh-TW": "解說範圍",
+        "en": "Scope"
+      },
+      "scopeAll": {
+        "zh-TW": "整份文件",
+        "en": "Whole file"
+      },
+      "scopeAllHint": {
+        "zh-TW": "依提問挑選重點",
+        "en": "Picks key passages for your question"
+      },
+      "scopePages": {
+        "zh-TW": "指定頁碼",
+        "en": "Page range"
+      },
+      "scopeRange": {
+        "zh-TW": "指定範圍",
+        "en": "Custom range"
+      },
+      "scopeChapter": {
+        "zh-TW": "選擇章節",
+        "en": "Chapter"
+      },
+      "scopeBookmarksCount": {
+        "zh-TW": "{count} 個書籤",
+        "en": "{count} bookmarks"
+      },
+      "scopeBookmarksCountOne": {
+        "zh-TW": "{count} 個書籤",
+        "en": "{count} bookmark"
+      },
+      "rangeStartAria": {
+        "zh-TW": "起始{unit}",
+        "en": "Start {unit}"
+      },
+      "rangeEndAria": {
+        "zh-TW": "結束{unit}",
+        "en": "End {unit}"
+      },
+      "rangeTotalSuffix": {
+        "zh-TW": "共 {total} {unit}",
+        "en": "of {total} {unit}"
+      },
+      "chapterSelectAria": {
+        "zh-TW": "選擇章節",
+        "en": "Choose a chapter"
+      },
+      "attachImagesLabel": {
+        "zh-TW": "附上頁面影像",
+        "en": "Include page images"
+      },
+      "attachImagesHint": {
+        "zh-TW": "把範圍內的掃描頁與含圖表的頁面轉成影像給模型看（每次最多 {maxPages} 頁），會增加用量與等待時間。",
+        "en": "Sends scanned pages and charts as images (up to {maxPages} pages per run). Uses more quota and takes a bit longer."
+      },
+      "attachImagesNoTextCount": {
+        "zh-TW": "這份 PDF 有 {count} 頁沒有文字層。",
+        "en": "{count} pages in this PDF have no text layer."
+      },
+      "attachImagesNoTextCountOne": {
+        "zh-TW": "這份 PDF 有 {count} 頁沒有文字層。",
+        "en": "{count} page in this PDF has no text layer."
+      },
+      "deepReadHeading": {
+        "zh-TW": "深度解析圖表與公式",
+        "en": "Read charts and formulas"
+      },
+      "deepReadAction": {
+        "zh-TW": "深度解析",
+        "en": "Read pages"
+      },
+      "deepReadBatchAction": {
+        "zh-TW": "深度解析 {pages} 頁（約 {calls} 次模型呼叫）",
+        "en": "Read {pages} pages (~{calls} AI calls)"
+      },
+      "deepReadNoneNeeded": {
+        "zh-TW": "沒有需要深度解析的頁面",
+        "en": "No pages need image reading"
+      },
+      "deepReadAllDone": {
+        "zh-TW": "已全部解析",
+        "en": "All pages read"
+      },
+      "deepReadNoModelHint": {
+        "zh-TW": "連上支援圖片閱讀的 AI 後可使用。",
+        "en": "Connect an AI that can read images in Settings to use this."
+      },
+      "deepReadStop": {
+        "zh-TW": "停止",
+        "en": "Stop"
+      },
+      "deepReadStarting": {
+        "zh-TW": "正在開始深度解析…",
+        "en": "Starting page reading…"
+      },
+      "deepReadDoneToast": {
+        "zh-TW": "深度解析完成：{pages} 頁",
+        "en": "Finished reading {pages} pages"
+      },
+      "deepReadStoppedToast": {
+        "zh-TW": "已停止深度解析；已完成的頁面都已保存。",
+        "en": "Stopped reading pages. Completed pages were saved."
+      },
+      "deepReadFailedFallback": {
+        "zh-TW": "深度解析沒有完成。",
+        "en": "Couldn't finish reading those pages."
+      },
+      "pdfPasswordLabel": {
+        "zh-TW": "PDF 密碼",
+        "en": "PDF password"
+      },
+      "pdfPasswordHint": {
+        "zh-TW": "附上頁面影像與深度解析需要密碼；只用於這次讀取，不會儲存。",
+        "en": "Needed to render page images. Used only for this session and never saved."
+      },
+      "lockedTitle": {
+        "zh-TW": "這份 PDF 有密碼保護",
+        "en": "This PDF is password-protected"
+      },
+      "lockedRetryTitle": {
+        "zh-TW": "密碼不正確，請再試一次",
+        "en": "Incorrect password. Try again."
+      },
+      "lockedHint": {
+        "zh-TW": "密碼只用於讀取與這次解說，不會儲存；之後檢視原檔時會再詢問。",
+        "en": "Used only to read this file for your lesson and never saved."
+      },
+      "openPdfAction": {
+        "zh-TW": "開啟 PDF",
+        "en": "Unlock PDF"
+      },
+      "previewSummary": {
+        "zh-TW": "預覽擷取文字",
+        "en": "Preview extracted text"
+      },
+      "previewExcerptMeta": {
+        "zh-TW": "開頭節錄 · {chars} 字元",
+        "en": "Opening excerpt · {chars} chars"
+      },
+      "previewAria": {
+        "zh-TW": "擷取文字預覽",
+        "en": "Extracted text preview"
+      },
+      "retryUpload": {
+        "zh-TW": "重試",
+        "en": "Try again"
+      },
+      "errors": {
+        "invalidRange": {
+          "zh-TW": "請輸入第 1–{max} {unit}之間的範圍，起點不能大於終點。",
+          "en": "Enter a range between 1 and {max} ({unit}), with the start no greater than the end."
+        },
+        "scansNeedImages": {
+          "zh-TW": "所選範圍都是沒有文字層的頁面，請開啟「附上頁面影像」或選擇其他範圍。",
+          "en": "Selected pages have no text layer. Turn on “Include page images” or pick another range."
+        },
+        "scansNeedPassword": {
+          "zh-TW": "所選範圍都是沒有文字層的頁面，請輸入 PDF 密碼以附上頁面影像。",
+          "en": "Selected pages have no text layer. Enter the PDF password to include page images."
+        },
+        "unsupportedType": {
+          "zh-TW": "請選擇 PDF、DOCX、PPTX、TXT 或 Markdown 檔案。",
+          "en": "Choose a PDF, DOCX, PPTX, TXT, or Markdown file."
+        },
+        "emptyFile": {
+          "zh-TW": "這份檔案是空的，請選擇有內容的檔案。",
+          "en": "This file is empty. Choose a file with content."
+        },
+        "fileTooLarge": {
+          "zh-TW": "檔案超過 {maxMb} MB，請先分成較小的章節再上傳。",
+          "en": "This file is over {maxMb} MB. Split it into smaller parts and try again."
+        },
+        "singleFileOnly": {
+          "zh-TW": "一次解釋一份檔案，請先選擇其中一份。",
+          "en": "Explain one file at a time. Pick one to start."
+        },
+        "readFailed": {
+          "zh-TW": "無法讀取檔案，請重新嘗試。",
+          "en": "Couldn't read this file. Try again."
+        }
+      }
+    },
+    "generation": {
+      "noModel": {
+        "zh-TW": "Codex 未連接",
+        "en": "AI isn't connected"
+      },
+      "openSettings": {
+        "zh-TW": "設定",
+        "en": "Settings"
+      },
+      "cancel": {
+        "zh-TW": "取消",
+        "en": "Cancel"
+      },
+      "cancelling": {
+        "zh-TW": "正在取消…",
+        "en": "Canceling…"
+      },
+      "cancelFailedToast": {
+        "zh-TW": "無法取消，請稍後再試。",
+        "en": "Couldn't cancel right now. Try again in a moment."
+      },
+      "preparing": {
+        "zh-TW": "正在準備你的學習內容…",
+        "en": "Preparing your lesson…"
+      },
+      "preparingSample": {
+        "zh-TW": "正在開啟人工編寫的互動示範…",
+        "en": "Opening handcrafted sample…"
+      },
+      "resuming": {
+        "zh-TW": "正在繼續先前的解說…",
+        "en": "Picking up your earlier lesson…"
+      },
+      "stages": {
+        "read": {
+          "label": {
+            "zh-TW": "讀取來源",
+            "en": "Read source"
+          },
+          "detail": {
+            "zh-TW": "掌握內容與範圍",
+            "en": "Scanning content and scope"
+          }
+        },
+        "analyze": {
+          "label": {
+            "zh-TW": "拆解概念",
+            "en": "Break down"
+          },
+          "detail": {
+            "zh-TW": "找到理解的關鍵",
+            "en": "Finding the key ideas"
+          }
+        },
+        "teach": {
+          "label": {
+            "zh-TW": "生成解說",
+            "en": "Write lesson"
+          },
+          "detail": {
+            "zh-TW": "文字、範例與動畫",
+            "en": "Steps, examples, and visuals"
+          }
+        },
+        "organize": {
+          "label": {
+            "zh-TW": "連結知識",
+            "en": "Save & link"
+          },
+          "detail": {
+            "zh-TW": "分類並儲存筆記",
+            "en": "Filing and linking notes"
+          }
+        }
+      },
+      "savedToast": {
+        "zh-TW": "解說已儲存到你的知識庫",
+        "en": "Saved to your Library"
+      },
+      "completedToast": {
+        "zh-TW": "《{title}》已完成",
+        "en": "“{title}” is ready"
+      },
+      "resumedCompletedToast": {
+        "zh-TW": "上次的解說已完成",
+        "en": "Your previous lesson is ready"
+      },
+      "openNoteAction": {
+        "zh-TW": "打開筆記",
+        "en": "Open note"
+      },
+      "cancelledToast": {
+        "zh-TW": "已取消這次解說",
+        "en": "Canceled explanation"
+      },
+      "failedFallback": {
+        "zh-TW": "生成失敗，請稍後再試",
+        "en": "Couldn't finish this explanation. Try again in a bit."
+      },
+      "failedToast": {
+        "zh-TW": "這次解說沒有完成",
+        "en": "Couldn't finish this explanation"
+      },
+      "viewReasonAction": {
+        "zh-TW": "查看原因",
+        "en": "See why"
+      },
+      "resumedFailedToast": {
+        "zh-TW": "上次的解說沒有完成：{reason}",
+        "en": "Your previous lesson didn't finish: {reason}"
+      },
+      "resumedFailedFallback": {
+        "zh-TW": "請重新開始。",
+        "en": "Please start again."
+      },
+      "resumedUnknownToast": {
+        "zh-TW": "上次的解說狀態無法確認（伺服器可能已重新啟動），請到知識庫查看或重新開始。",
+        "en": "Couldn't confirm your previous lesson (the server may have restarted). Check your Library or start again."
+      }
+    },
+    "jobs": {
+      "inProgressFallback": {
+        "zh-TW": "進行中",
+        "en": "In progress"
+      },
+      "explainingPill": {
+        "zh-TW": "正在解說：{title}",
+        "en": "Explaining: {title}"
+      },
+      "viewProgressTitle": {
+        "zh-TW": "查看生成進度",
+        "en": "View progress"
+      },
+      "otherTabExplainingPill": {
+        "zh-TW": "其他頁面正在解說：{title}",
+        "en": "Explaining in another tab: {title}"
+      },
+      "otherTabTitle": {
+        "zh-TW": "在其他分頁或裝置開始的解說",
+        "en": "Started in another tab or device"
+      },
+      "deepReadingPill": {
+        "zh-TW": "正在深度解析：{title}",
+        "en": "Reading pages: {title}"
+      },
+      "deepReadingTitle": {
+        "zh-TW": "深度解析在伺服器上進行，離開頁面不會停止",
+        "en": "Runs on the server and keeps going if you leave this page"
+      },
+      "stopAction": {
+        "zh-TW": "停止",
+        "en": "Stop"
+      },
+      "stopFailedToast": {
+        "zh-TW": "無法停止，請稍後再試。",
+        "en": "Couldn't stop right now. Try again in a moment."
+      },
+      "examplesPill": {
+        "zh-TW": "正在補上實作案例：{title}",
+        "en": "Adding examples: {title}"
+      },
+      "backToNoteTitle": {
+        "zh-TW": "回到這篇筆記",
+        "en": "Back to note"
+      }
+    },
+    "samples": {
+      "closure": {
+        "zh-TW": "為什麼函式會有記憶？",
+        "en": "Why do functions remember variables?"
+      },
+      "eventLoop": {
+        "zh-TW": "搞懂 Event Loop",
+        "en": "Understand the Event Loop"
+      },
+      "debounce": {
+        "zh-TW": "搜尋框背後的 Debounce",
+        "en": "How Debounce tames search input"
+      }
+    },
+    "pageError": {
+      "lessonsUnreachable": {
+        "zh-TW": "無法連線 Explain（知識庫）。",
+        "en": "Can't reach Explain (Library)."
+      },
+      "configUnreachable": {
+        "zh-TW": "無法連線 Explain（設定）。",
+        "en": "Can't reach Explain (Settings)."
+      },
+      "reload": {
+        "zh-TW": "重新載入",
+        "en": "Reload"
+      }
+    },
+    "reviewCard": {
+      "eyebrow": {
+        "zh-TW": "複習",
+        "en": "Review"
+      },
+      "loading": {
+        "zh-TW": "載入中…",
+        "en": "Loading…"
+      },
+      "loadingAria": {
+        "zh-TW": "複習，正在載入數量…",
+        "en": "Review, loading count…"
+      },
+      "unknownBadge": {
+        "zh-TW": "—",
+        "en": "—"
+      },
+      "errorTitle": {
+        "zh-TW": "無法讀取複習數量",
+        "en": "Couldn't load reviews"
+      },
+      "retry": {
+        "zh-TW": "重試",
+        "en": "Try again"
+      },
+      "retrying": {
+        "zh-TW": "重試中…",
+        "en": "Trying again…"
+      },
+      "errorAria": {
+        "zh-TW": "複習數量讀取失敗，點選即可重試",
+        "en": "Couldn't load review count. Select to try again."
+      },
+      "errorTooltip": {
+        "zh-TW": "複習數量讀取失敗，點選即可重試",
+        "en": "Couldn't load review count. Select to try again."
+      },
+      "waitingCount": {
+        "zh-TW": "{count} 張待複習",
+        "en": "{count} cards to review"
+      },
+      "waitingCountOne": {
+        "zh-TW": "{count} 張待複習",
+        "en": "{count} card to review"
+      },
+      "duePart": {
+        "zh-TW": "{due} 到期",
+        "en": "{due} due"
+      },
+      "newPart": {
+        "zh-TW": "{newCount} 新卡",
+        "en": "{newCount} new"
+      },
+      "breakdownJoin": {
+        "zh-TW": "{duePart} · {newPart}",
+        "en": "{duePart} · {newPart}"
+      },
+      "dueAndNew": {
+        "zh-TW": "{due} 張待複習 · {newCount} 新卡",
+        "en": "{due} cards due · {newCount} new cards"
+      },
+      "dueOneAndNew": {
+        "zh-TW": "{due} 張待複習 · {newCount} 新卡",
+        "en": "{due} card due · {newCount} new cards"
+      },
+      "dueAndNewOne": {
+        "zh-TW": "{due} 張待複習 · {newCount} 新卡",
+        "en": "{due} cards due · {newCount} new card"
+      },
+      "dueOneAndNewOne": {
+        "zh-TW": "{due} 張待複習 · {newCount} 新卡",
+        "en": "{due} card due · {newCount} new card"
+      },
+      "staleHint": {
+        "zh-TW": "上次成功的資料",
+        "en": "Last known count"
+      },
+      "staleWithRetry": {
+        "zh-TW": "上次成功的資料 · 重試",
+        "en": "Last known count · Try again"
+      }
+    },
+    "continueReading": {
+      "eyebrow": {
+        "zh-TW": "繼續閱讀",
+        "en": "Continue reading"
+      },
+      "where": {
+        "zh-TW": "{current} / {total} · {heading}",
+        "en": "{current} / {total} · {heading}"
+      },
+      "progressAria": {
+        "zh-TW": "這篇已讀到的段落",
+        "en": "Reading progress in this lesson"
+      }
+    },
+    "recent": {
+      "heading": {
+        "zh-TW": "最近筆記",
+        "en": "Recent notes"
+      },
+      "openLibrary": {
+        "zh-TW": "知識庫",
+        "en": "Library"
+      },
+      "loading": {
+        "zh-TW": "載入中…",
+        "en": "Loading…"
+      },
+      "emptyTitle": {
+        "zh-TW": "還沒有筆記",
+        "en": "No notes yet"
+      },
+      "emptyAction": {
+        "zh-TW": "開始解釋",
+        "en": "Start explaining"
+      }
+    }
+  },
+  "library": {
+    "title": {
+      "zh-TW": "知識庫",
+      "en": "Library"
+    },
+    "savedTitle": {
+      "zh-TW": "收藏",
+      "en": "Saved"
+    },
+    "newLessonAction": {
+      "zh-TW": "新的學習",
+      "en": "New lesson"
+    },
+    "filterAria": {
+      "zh-TW": "依分類篩選",
+      "en": "Filter by topic"
+    },
+    "filterAll": {
+      "zh-TW": "全部筆記",
+      "en": "All notes"
+    },
+    "searchPlaceholder": {
+      "zh-TW": "搜尋標題、內容或主題",
+      "en": "Search titles, content, or topics"
+    },
+    "searchAria": {
+      "zh-TW": "搜尋筆記",
+      "en": "Search notes"
+    },
+    "clearSearchAria": {
+      "zh-TW": "清除搜尋",
+      "en": "Clear search"
+    },
+    "resultCountUnknown": {
+      "zh-TW": "—",
+      "en": "—"
+    },
+    "resultCount": {
+      "zh-TW": "{count} 篇筆記",
+      "en": "{count} notes"
+    },
+    "resultCountOne": {
+      "zh-TW": "{count} 篇筆記",
+      "en": "{count} note"
+    },
+    "resultCountQuery": {
+      "zh-TW": "{count} 篇與「{query}」相關的筆記",
+      "en": "{count} notes matching “{query}”"
+    },
+    "resultCountQueryOne": {
+      "zh-TW": "{count} 篇與「{query}」相關的筆記",
+      "en": "{count} note matching “{query}”"
+    },
+    "sortCreated": {
+      "zh-TW": "依建立時間",
+      "en": "Newest first"
+    },
+    "emptyMatchTitle": {
+      "zh-TW": "還沒有找到相符的筆記",
+      "en": "No matching notes"
+    },
+    "emptyMatchBody": {
+      "zh-TW": "換個關鍵字，或開始一段新的學習。",
+      "en": "Try another keyword, or start a new lesson."
+    },
+    "emptyLibraryTitle": {
+      "zh-TW": "知識庫還沒有筆記",
+      "en": "Your Library is empty"
+    },
+    "emptyLibraryBody": {
+      "zh-TW": "貼上程式碼、文章或檔案，完成後就會收進這裡。",
+      "en": "Start an explanation from code, an article, or a file, and it'll show up here."
+    },
+    "emptySavedTitle": {
+      "zh-TW": "收藏讓你想再看一次的理解",
+      "en": "Save lessons worth revisiting"
+    },
+    "emptySavedBody": {
+      "zh-TW": "點選筆記上的星號，就可以收藏。",
+      "en": "Select the star on any note to keep it here."
+    },
+    "card": {
+      "dateLocale": {
+        "zh-TW": "zh-TW",
+        "en": "en-US"
+      },
+      "openAria": {
+        "zh-TW": "開啟 {title}",
+        "en": "Open {title}"
+      },
+      "saveAria": {
+        "zh-TW": "收藏 {title}",
+        "en": "Save {title}"
+      },
+      "unsaveAria": {
+        "zh-TW": "取消收藏 {title}",
+        "en": "Remove {title} from Saved"
+      },
+      "saveTooltip": {
+        "zh-TW": "收藏",
+        "en": "Save"
+      },
+      "unsaveTooltip": {
+        "zh-TW": "取消收藏",
+        "en": "Remove from Saved"
+      },
+      "metaSteps": {
+        "zh-TW": "{category} · {count} 步",
+        "en": "{category} · {count} steps"
+      },
+      "metaStepsOne": {
+        "zh-TW": "{category} · {count} 步",
+        "en": "{category} · {count} step"
+      },
+      "metaSections": {
+        "zh-TW": "{category} · {count} 段",
+        "en": "{category} · {count} sections"
+      },
+      "metaSectionsOne": {
+        "zh-TW": "{category} · {count} 段",
+        "en": "{category} · {count} section"
+      }
+    }
+  },
+  "graph": {
+    "emptyTitle": {
+      "zh-TW": "第一個知識節點，從你開始",
+      "en": "Your knowledge map starts with a first note"
+    },
+    "emptyBody": {
+      "zh-TW": "完成一篇解說後，主題與筆記的連結就會出現在這裡。",
+      "en": "Finish an explanation and its topics and links will show up here."
+    },
+    "viewToggleAria": {
+      "zh-TW": "圖譜檢視方式",
+      "en": "Map view"
+    },
+    "viewList": {
+      "zh-TW": "清單",
+      "en": "List"
+    },
+    "viewMap": {
+      "zh-TW": "圖譜",
+      "en": "Map"
+    },
+    "viewportAria": {
+      "zh-TW": "可水平平移的知識圖譜",
+      "en": "Scrollable knowledge map"
+    },
+    "canvasAria": {
+      "zh-TW": "互動知識圖譜，點選筆記開啟，點選主題篩選",
+      "en": "Interactive knowledge map: select a note to open it, or select a topic to filter"
+    },
+    "legendAria": {
+      "zh-TW": "圖例",
+      "en": "Legend"
+    },
+    "legendNote": {
+      "zh-TW": "筆記",
+      "en": "Note"
+    },
+    "legendTopic": {
+      "zh-TW": "主題",
+      "en": "Topic"
+    },
+    "legendLink": {
+      "zh-TW": "筆記關聯",
+      "en": "Connection"
+    },
+    "followUpLinkReason": {
+      "zh-TW": "延伸問題",
+      "en": "Follow-up"
+    },
+    "openNoteAria": {
+      "zh-TW": "開啟筆記：{title}",
+      "en": "Open note: {title}"
+    },
+    "openTopicAria": {
+      "zh-TW": "查看主題：{topic}",
+      "en": "Filter by topic: {topic}"
+    },
+    "footerNotes": {
+      "zh-TW": "{count} 篇筆記",
+      "en": "{count} notes"
+    },
+    "footerNotesOne": {
+      "zh-TW": "{count} 篇筆記",
+      "en": "{count} note"
+    },
+    "footerNotesCapped": {
+      "zh-TW": "顯示 {shown} / {total} 篇筆記",
+      "en": "Showing {shown} of {total} notes"
+    },
+    "footerTopics": {
+      "zh-TW": "{topics} 個主題",
+      "en": "{topics} topics"
+    },
+    "footerTopicsOne": {
+      "zh-TW": "{topics} 個主題",
+      "en": "{topics} topic"
+    },
+    "footerLinks": {
+      "zh-TW": "{links} 條關聯",
+      "en": "{links} links"
+    },
+    "footerLinksOne": {
+      "zh-TW": "{links} 條關聯",
+      "en": "{links} link"
+    },
+    "footerJoin": {
+      "zh-TW": "{notesPart} · {topicsPart}",
+      "en": "{notesPart} · {topicsPart}"
+    },
+    "footerJoinLinks": {
+      "zh-TW": "{notesPart} · {topicsPart} · {linksPart}",
+      "en": "{notesPart} · {topicsPart} · {linksPart}"
+    },
+    "allCategories": {
+      "zh-TW": "全部領域",
+      "en": "All areas"
+    },
+    "categoryFilterAria": {
+      "zh-TW": "依領域篩選知識圖譜",
+      "en": "Filter knowledge map by category"
+    },
+    "searchPlaceholder": {
+      "zh-TW": "篩選筆記或主題…",
+      "en": "Filter notes or topics..."
+    },
+    "searchAria": {
+      "zh-TW": "篩選知識圖譜節點",
+      "en": "Filter knowledge map nodes"
+    },
+    "clearSearchAria": {
+      "zh-TW": "清除篩選文字",
+      "en": "Clear filter text"
+    },
+    "toggleTopics": {
+      "zh-TW": "主題節點",
+      "en": "Topics"
+    },
+    "legendFollow": {
+      "zh-TW": "延伸追問",
+      "en": "Follow-up"
+    },
+    "zoomInAria": {
+      "zh-TW": "放大圖譜",
+      "en": "Zoom in"
+    },
+    "zoomOutAria": {
+      "zh-TW": "縮小圖譜",
+      "en": "Zoom out"
+    },
+    "resetViewAria": {
+      "zh-TW": "置中並重設視角",
+      "en": "Fit and reset view"
+    },
+    "reheatLayoutAria": {
+      "zh-TW": "重新排列引力佈局",
+      "en": "Relax force layout"
+    },
+    "canvasHint": {
+      "zh-TW": "拖曳旋轉 3D 球體 · 拉動微點牽引關聯 · 滾輪縮放 · 點選檢視概念脈絡",
+      "en": "Drag to spin 3D sphere · Pull nodes · Scroll to zoom · Click to inspect"
+    },
+    "orbitToggle": {
+      "zh-TW": "自動旋轉",
+      "en": "Auto-spin"
+    },
+    "orbitToggleAria": {
+      "zh-TW": "切換 3D 球體自動旋轉",
+      "en": "Toggle 3D sphere auto-rotation"
+    },
+    "layerApplied": {
+      "zh-TW": "整合與應用",
+      "en": "Synthesis"
+    },
+    "layerCore": {
+      "zh-TW": "核心原理",
+      "en": "Core"
+    },
+    "layerTopic": {
+      "zh-TW": "主題節點",
+      "en": "Topic"
+    },
+    "emptyFiltered": {
+      "zh-TW": "沒有符合篩選條件的節點",
+      "en": "No matching nodes"
+    },
+    "resetFilters": {
+      "zh-TW": "重設篩選",
+      "en": "Reset filters"
+    },
+    "inspectorAria": {
+      "zh-TW": "節點關聯詳情",
+      "en": "Node details"
+    },
+    "closeInspectorAria": {
+      "zh-TW": "關閉詳情面板",
+      "en": "Close details"
+    },
+    "openNoteButton": {
+      "zh-TW": "閱讀完整筆記",
+      "en": "Open note"
+    },
+    "jumpToNoteAria": {
+      "zh-TW": "開啟關聯筆記：{title}",
+      "en": "Open linked note: {title}"
+    },
+    "filterLibraryByTopic": {
+      "zh-TW": "在知識庫查看此主題",
+      "en": "View topic in Library"
+    },
+    "connectionsHeading": {
+      "zh-TW": "概念關聯",
+      "en": "Concept links"
+    },
+    "noConnections": {
+      "zh-TW": "尚無直接跨篇連結，可點選下方主題探索相近概念。",
+      "en": "No direct note links yet. Select a shared topic below to explore related ideas."
+    },
+    "sharedTopicsHeading": {
+      "zh-TW": "主題標籤",
+      "en": "Topics"
+    },
+    "topicNotesHeading": {
+      "zh-TW": "包含此主題的筆記",
+      "en": "Notes with this topic"
+    },
+    "sharedConceptLabel": {
+      "zh-TW": "共同概念",
+      "en": "Shared concept"
+    },
+    "sharedConceptReason": {
+      "zh-TW": "共同涵蓋：{tags}",
+      "en": "Shares topics: {tags}"
+    },
+    "relationLinksTo": {
+      "zh-TW": "延伸閱讀",
+      "en": "Links to"
+    },
+    "relationLinkedFrom": {
+      "zh-TW": "被引用",
+      "en": "Linked from"
+    },
+    "relationContinues": {
+      "zh-TW": "延伸自",
+      "en": "Builds on"
+    },
+    "relationContinuedBy": {
+      "zh-TW": "延伸出",
+      "en": "Extended by"
+    },
+    "relationParentReason": {
+      "zh-TW": "這篇是讀完它之後的延伸問題。",
+      "en": "Answers a follow-up question from this note."
+    },
+    "relationChildReason": {
+      "zh-TW": "從這篇的追問延伸出來。",
+      "en": "Grew out of a follow-up question on this note."
+    }
+  },
+  "repositories": {
+    "title": {
+      "zh-TW": "Repo 索引",
+      "en": "Repo Index"
+    },
+    "sourceGroupAria": {
+      "zh-TW": "索引來源",
+      "en": "Repository source"
+    },
+    "sourceGithub": {
+      "zh-TW": "公開 GitHub",
+      "en": "Public GitHub"
+    },
+    "sourceLocal": {
+      "zh-TW": "本機 Repo",
+      "en": "Local repo"
+    },
+    "locationLabelGithub": {
+      "zh-TW": "公開專案根網址",
+      "en": "Public repository URL"
+    },
+    "locationLabelLocal": {
+      "zh-TW": "授權讀取的 repository 根資料夾（絕對路徑）",
+      "en": "Allowed local repository folder (full path)"
+    },
+    "locationPlaceholderGithub": {
+      "zh-TW": "https://github.com/owner/repository",
+      "en": "https://github.com/owner/repository"
+    },
+    "locationPlaceholderLocal": {
+      "zh-TW": "/Users/your-name/Projects/my-repo",
+      "en": "/Users/your-name/Projects/my-repo"
+    },
+    "buildIndexAction": {
+      "zh-TW": "建立索引",
+      "en": "Index repo"
+    },
+    "scopeHint": {
+      "zh-TW": "只索引已提交的檔案",
+      "en": "Indexes committed files only"
+    },
+    "emptyTitle": {
+      "zh-TW": "還沒有索引的 Repo",
+      "en": "No indexed repositories yet"
+    },
+    "emptyBody": {
+      "zh-TW": "加入公開 GitHub 網址或本機資料夾，就能針對整個專案提問。",
+      "en": "Add a public GitHub link or local repo folder to ask questions across the codebase."
+    },
+    "listAria": {
+      "zh-TW": "已建立的 repository",
+      "en": "Indexed repositories"
+    },
+    "states": {
+      "queued": {
+        "zh-TW": "等待中",
+        "en": "Queued"
+      },
+      "running": {
+        "zh-TW": "索引中",
+        "en": "Indexing"
+      },
+      "completed": {
+        "zh-TW": "已索引",
+        "en": "Indexed"
+      },
+      "cancelled": {
+        "zh-TW": "已取消",
+        "en": "Canceled"
+      },
+      "failed": {
+        "zh-TW": "未完成",
+        "en": "Incomplete"
+      }
+    },
+    "cardCounts": {
+      "zh-TW": "{files} 個文字檔 · {chunks} 個分段",
+      "en": "{files} text files · {chunks} sections"
+    },
+    "cardCountsOneFile": {
+      "zh-TW": "{files} 個文字檔 · {chunks} 個分段",
+      "en": "{files} text file · {chunks} sections"
+    },
+    "cardTruncatedSuffix": {
+      "zh-TW": "{commit} · 範圍有限",
+      "en": "{commit} · partial scope"
+    },
+    "updateAction": {
+      "zh-TW": "更新版本",
+      "en": "Update snapshot"
+    },
+    "updateTitle": {
+      "zh-TW": "讀取來源目前的 HEAD，另外建立索引並保留舊版本。",
+      "en": "Index the current HEAD while keeping earlier snapshots."
+    },
+    "updateBusyTitle": {
+      "zh-TW": "相同來源已有索引工作，請等待完成。",
+      "en": "An index job for this repo is already running."
+    },
+    "removeAction": {
+      "zh-TW": "移除此索引",
+      "en": "Remove index"
+    },
+    "updateKeepNote": {
+      "zh-TW": "更新會保留舊 commit，另外建立最新版本的索引。",
+      "en": "Updating keeps earlier commits and adds a new snapshot for the latest version."
+    },
+    "deleteGroupAria": {
+      "zh-TW": "確認移除 repository 索引",
+      "en": "Confirm removing repository index"
+    },
+    "deleteTitle": {
+      "zh-TW": "移除「{label}」的這個索引版本？",
+      "en": "Remove this index snapshot for “{label}”?"
+    },
+    "deleteBody": {
+      "zh-TW": "會刪除此版本的檔案、搜尋分段與向量快取；進行中的索引工作也會取消。已儲存的教學筆記及其中的來源快照會保留。其他 commit 版本不受影響。",
+      "en": "This deletes the indexed files and search cache for this snapshot and stops any running job. Your saved lessons and other commit snapshots stay intact."
+    },
+    "deleteKeep": {
+      "zh-TW": "保留索引",
+      "en": "Keep index"
+    },
+    "deleteConfirm": {
+      "zh-TW": "確認移除",
+      "en": "Remove"
+    },
+    "jobProgressAria": {
+      "zh-TW": "Repository 索引進度",
+      "en": "Repository indexing progress"
+    },
+    "jobCancel": {
+      "zh-TW": "取消",
+      "en": "Cancel"
+    },
+    "jobResume": {
+      "zh-TW": "從保存進度繼續",
+      "en": "Resume from saved progress"
+    },
+    "metrics": {
+      "treeItems": {
+        "zh-TW": "檔案樹項目",
+        "en": "Files in tree"
+      },
+      "indexedFiles": {
+        "zh-TW": "已索引文字檔",
+        "en": "Indexed files"
+      },
+      "skippedFiles": {
+        "zh-TW": "已排除",
+        "en": "Skipped"
+      },
+      "chunks": {
+        "zh-TW": "可引用分段",
+        "en": "Citable sections"
+      }
+    },
+    "scopeSummary": {
+      "zh-TW": "索引範圍與限制",
+      "en": "Scope and limits"
+    },
+    "scopeTruncatedSummary": {
+      "zh-TW": "索引範圍與限制 · 部分文字檔未收錄",
+      "en": "Scope and limits · Some text files omitted"
+    },
+    "scopeLimitsBody": {
+      "zh-TW": "每個專案最多 10,000 個合格檔案、50 MB 文字與 60,000 分段；每檔最多 250 KB。索引完成後，AI 會依問題取出相關段落，來源筆記會保留實際使用範圍。",
+      "en": "Up to 10,000 eligible files, 50 MB of text, and 60,000 sections per repo (250 KB per file). When you ask a question, AI pulls in matching sections and records the exact lines used."
+    },
+    "fileSearchAria": {
+      "zh-TW": "搜尋全部索引檔案路徑",
+      "en": "Search indexed file paths"
+    },
+    "fileSearchPlaceholder": {
+      "zh-TW": "搜尋檔案路徑…",
+      "en": "Filter file paths…"
+    },
+    "fileStates": {
+      "indexed": {
+        "zh-TW": "已收錄",
+        "en": "Indexed"
+      },
+      "skipped": {
+        "zh-TW": "排除",
+        "en": "Skipped"
+      },
+      "pending": {
+        "zh-TW": "等待",
+        "en": "Pending"
+      }
+    },
+    "filesLoading": {
+      "zh-TW": "檔案樹讀取中…",
+      "en": "Loading file tree…"
+    },
+    "filesEmpty": {
+      "zh-TW": "沒有符合的檔案。",
+      "en": "No matching files."
+    },
+    "prevPageAria": {
+      "zh-TW": "上一頁檔案",
+      "en": "Previous files"
+    },
+    "nextPageAria": {
+      "zh-TW": "下一頁檔案",
+      "en": "Next files"
+    },
+    "pageRange": {
+      "zh-TW": "{start}–{end} / {total}",
+      "en": "{start}–{end} / {total}"
+    },
+    "zeroFiles": {
+      "zh-TW": "0 個檔案",
+      "en": "0 files"
+    },
+    "filePreviewLoading": {
+      "zh-TW": "讀取 commit 中的檔案…",
+      "en": "Loading file from snapshot…"
+    },
+    "fileMeta": {
+      "zh-TW": "{kb} KB · {chunks} 個分段",
+      "en": "{kb} KB · {chunks} sections"
+    },
+    "fileMetaOne": {
+      "zh-TW": "{kb} KB · {chunks} 個分段",
+      "en": "{kb} KB · {chunks} section"
+    },
+    "citationsPrefix": {
+      "zh-TW": "引用範圍：{ranges}",
+      "en": "Citable lines: {ranges}"
+    },
+    "citationsEmpty": {
+      "zh-TW": "引用範圍：空白檔案沒有文字分段",
+      "en": "Citable lines: empty file"
+    },
+    "filePendingFallback": {
+      "zh-TW": "此檔案仍在等待索引。",
+      "en": "This file is still waiting to be indexed."
+    },
+    "selectFilePrompt": {
+      "zh-TW": "選擇檔案，核對實際內容與行號。",
+      "en": "Select a file to inspect its contents and line numbers."
+    },
+    "questionLabel": {
+      "zh-TW": "你想先讀懂哪一部分？",
+      "en": "What part would you like to understand first?"
+    },
+    "questionLabelFile": {
+      "zh-TW": "深入理解 {path}",
+      "en": "Explore {path}"
+    },
+    "questionPlaceholder": {
+      "zh-TW": "例如：從使用者送出請求開始，資料經過哪些函式？請搭配動畫解釋。",
+      "en": "e.g. Trace how a request flows through the functions from start to finish."
+    },
+    "readyNote": {
+      "zh-TW": "會使用此 commit 中可引用的分段，生成完整教學筆記。",
+      "en": "Builds a lesson from citable sections in this snapshot."
+    },
+    "waitingNote": {
+      "zh-TW": "索引完成後即可生成教學筆記。",
+      "en": "You can start a lesson once indexing finishes."
+    },
+    "startExplainAction": {
+      "zh-TW": "開始解說",
+      "en": "Start explaining"
+    },
+    "errors": {
+      "loadFailed": {
+        "zh-TW": "無法讀取知識索引。",
+        "en": "Couldn't load Repo Index."
+      },
+      "serviceUnreachable": {
+        "zh-TW": "索引服務無法回應。",
+        "en": "Repo Index isn't responding right now."
+      },
+      "alreadyIndexing": {
+        "zh-TW": "這個來源已有索引工作進行中，已切換到該工作。",
+        "en": "This repo is already being indexed. Switched to that job."
+      },
+      "createFailed": {
+        "zh-TW": "無法建立索引。",
+        "en": "Couldn't start indexing."
+      },
+      "updateFailed": {
+        "zh-TW": "無法建立新版本索引。",
+        "en": "Couldn't index the new snapshot."
+      },
+      "removeFailed": {
+        "zh-TW": "無法移除此索引。",
+        "en": "Couldn't remove this index."
+      },
+      "jobActionFailed": {
+        "zh-TW": "工作操作失敗。",
+        "en": "Couldn't update the index job."
+      },
+      "readFileFailed": {
+        "zh-TW": "無法讀取檔案。",
+        "en": "Couldn't load this file."
+      }
+    }
+  },
+  "search": {
+    "dialogTitle": {
+      "zh-TW": "搜尋",
+      "en": "Search"
+    },
+    "placeholder": {
+      "zh-TW": "搜尋",
+      "en": "Search"
+    },
+    "inputAria": {
+      "zh-TW": "搜尋所有筆記",
+      "en": "Search all notes"
+    },
+    "suggestions": {
+      "closure": {
+        "zh-TW": "函式為什麼能記得外面的變數",
+        "en": "Why functions remember outer variables"
+      },
+      "debounce": {
+        "zh-TW": "連續輸入後只送出最後一次請求",
+        "en": "Sending only the last request while typing"
+      },
+      "asyncOrder": {
+        "zh-TW": "非同步工作按照什麼順序執行",
+        "en": "What order async tasks run in"
+      }
+    },
+    "semantic": {
+      "regionAria": {
+        "zh-TW": "知識庫搜尋結果",
+        "en": "Library search results"
+      },
+      "compactRegionAria": {
+        "zh-TW": "相關知識段落",
+        "en": "Related passages"
+      },
+      "heading": {
+        "zh-TW": "跨筆記與程式碼搜尋",
+        "en": "Across notes and code"
+      },
+      "compactHeading": {
+        "zh-TW": "與這一段相關",
+        "en": "Related to this section"
+      },
+      "modeHybrid": {
+        "zh-TW": "語意＋關鍵字",
+        "en": "Meaning + keyword"
+      },
+      "modeKeyword": {
+        "zh-TW": "關鍵字搜尋",
+        "en": "Keyword match"
+      },
+      "modeKeywordTitle": {
+        "zh-TW": "尚未啟用語意向量，依文字內容比對",
+        "en": "Semantic search isn't enabled yet; matching exact words"
+      },
+      "enableSemanticHint": {
+        "zh-TW": "在設定中啟用多語向量模型，就能搜尋用不同文字描述的相關概念。",
+        "en": "Turn on semantic search in Settings to find related ideas phrased in different words."
+      },
+      "searching": {
+        "zh-TW": "正在比對相關段落…",
+        "en": "Finding matching passages…"
+      },
+      "empty": {
+        "zh-TW": "目前沒有相符的段落，試試其他概念或先建立筆記與 Repo 索引。",
+        "en": "No matching passages yet. Try another phrase, or add notes and Repo indexes first."
+      },
+      "errorFallback": {
+        "zh-TW": "搜尋暫時無法回應。",
+        "en": "Search isn't responding right now."
+      },
+      "lessonCitation": {
+        "zh-TW": "筆記段落",
+        "en": "Note section"
+      },
+      "similarityScore": {
+        "zh-TW": "相似度 {score}",
+        "en": "Match {score}"
+      },
+      "similarityTitle": {
+        "zh-TW": "向量餘弦相似度，用來排序，並非正確率。",
+        "en": "Similarity score used for ranking, not accuracy."
+      }
+    }
+  }
+}

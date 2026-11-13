@@ -1,0 +1,25 @@
+services:
+  sync:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.sync
+    environment:
+      BELL_SYNC_TOKEN: ${BELL_SYNC_TOKEN:?Set BELL_SYNC_TOKEN in deployment/.env}
+      BELL_SYNC_DB: /data/sync.sqlite
+      HOST: 0.0.0.0
+      PORT: 8080
+    ports:
+      - "127.0.0.1:8787:8080"
+    volumes:
+      - sync-data:/data
+    restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+volumes:
+  sync-data:

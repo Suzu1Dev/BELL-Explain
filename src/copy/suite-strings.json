@@ -1,0 +1,82 @@
+{
+  "apps": {
+    "personal": {
+      "name": { "zh-TW": "BELL Personal", "en": "BELL Personal" },
+      "summary": { "zh-TW": "今日與收件匣", "en": "Today and inbox" }
+    },
+    "explain": {
+      "name": { "zh-TW": "BELL Explain", "en": "BELL Explain" },
+      "summary": { "zh-TW": "理解與複習", "en": "Understanding and review" }
+    },
+    "pr": {
+      "name": { "zh-TW": "BELL PR", "en": "BELL PR" },
+      "summary": { "zh-TW": "貢獻與審查", "en": "Contributions and review" }
+    },
+    "reader": {
+      "name": { "zh-TW": "BELL Web Reader", "en": "BELL Web Reader" },
+      "summary": { "zh-TW": "網頁閱讀與標註", "en": "Web reading and markup" }
+    },
+    "campaign": {
+      "name": { "zh-TW": "BELL Campaign", "en": "BELL Campaign" },
+      "summary": { "zh-TW": "活動時程與協作", "en": "Event timeline and collaboration" }
+    }
+  },
+  "switcher": {
+    "label": { "zh-TW": "切換 BELL 產品", "en": "Switch BELL products" },
+    "heading": { "zh-TW": "BELL 產品", "en": "BELL products" },
+    "menuLabel": { "zh-TW": "BELL 產品", "en": "BELL products" },
+    "searchPlaceholder": { "zh-TW": "切換到…", "en": "Switch to…" },
+    "empty": { "zh-TW": "沒有符合的產品。", "en": "No matching products." },
+    "current": { "zh-TW": "目前", "en": "Current" },
+    "unlinked": { "zh-TW": "尚未連結", "en": "Not linked" },
+    "loading": { "zh-TW": "正在載入產品清單…", "en": "Loading BELL products…" },
+    "failed": { "zh-TW": "無法載入產品清單", "en": "Couldn't load BELL products" },
+    "retry": { "zh-TW": "重試", "en": "Try again" }
+  },
+  "handoff": {
+    "bannerAria": { "zh-TW": "交接草稿來源", "en": "Draft source" },
+    "checking": { "zh-TW": "正在確認交接來源…", "en": "Checking draft source…" },
+    "defaultSource": { "zh-TW": "BELL Explain", "en": "BELL Explain" },
+    "dismissErrorAria": { "zh-TW": "關閉交接錯誤提示", "en": "Dismiss draft notice" },
+    "dismissErrorTitle": { "zh-TW": "關閉", "en": "Dismiss" },
+    "truncated": { "zh-TW": "內容過長，已截斷為前 2,000 字", "en": "Long text was trimmed to the first 2,000 characters" },
+    "back": { "zh-TW": "回到 {name}", "en": "Back to {name}" },
+    "fromApp": { "zh-TW": "來自 {name}", "en": "From {name}" },
+    "fromAppKind": { "zh-TW": "來自 {name} · {kind}", "en": "From {name} · {kind}" },
+    "fromAppTitle": { "zh-TW": "來自 {name}「{title}」", "en": "From {name} “{title}”" },
+    "fromAppKindTitle": { "zh-TW": "來自 {name} · {kind}「{title}」", "en": "From {name} · {kind} “{title}”" },
+    "kinds": {
+      "task": { "zh-TW": "待辦", "en": "task" },
+      "idea": { "zh-TW": "靈感", "en": "idea" },
+      "email": { "zh-TW": "郵件", "en": "email" },
+      "event": { "zh-TW": "行程", "en": "event" },
+      "note": { "zh-TW": "筆記", "en": "note" },
+      "page": { "zh-TW": "頁面", "en": "page" },
+      "schedule": { "zh-TW": "時程", "en": "schedule" }
+    },
+    "errors": {
+      "duplicateFields": { "zh-TW": "交接網址有重複欄位，請重新發起。", "en": "This link had duplicate fields. Please try again from the source app." },
+      "missingText": { "zh-TW": "交接網址沒有草稿文字，請重新發起。", "en": "This link didn't include any text. Please try again from the source app." },
+      "unlinkedSource": { "zh-TW": "交接來源未連結或無法辨識，請重新發起。", "en": "The source app isn't linked or recognized. Please try again from a linked app." },
+      "emptyText": { "zh-TW": "交接草稿沒有可讀取的文字。", "en": "This draft didn't contain any readable text." }
+    },
+    "composerAria": { "zh-TW": "建立學習解說", "en": "Create an explanation" },
+    "draftInputAria": { "zh-TW": "編輯交接草稿", "en": "Edit draft text" },
+    "draftPlaceholder": { "zh-TW": "問一個問題，或貼上文字、連結", "en": "Ask a question, or paste text or a link" },
+    "startExplain": { "zh-TW": "開始解釋", "en": "Start explaining" },
+    "startingExplain": { "zh-TW": "正在整理理解", "en": "Explaining…" },
+    "discard": { "zh-TW": "捨棄", "en": "Discard" },
+    "untitledFallback": { "zh-TW": "新的解說", "en": "New explanation" },
+    "toPersonal": {
+      "dialogTitle": { "zh-TW": "送到 Personal", "en": "Send to Personal" },
+      "openDraft": { "zh-TW": "開啟待辦草稿", "en": "Open task draft" },
+      "discard": { "zh-TW": "捨棄", "en": "Discard" },
+      "unlinked": { "zh-TW": "尚未連結", "en": "Not linked" },
+      "sourceReview": { "zh-TW": "BELL Explain · 複習「{title}」", "en": "BELL Explain · review “{title}”" },
+      "sourceNote": { "zh-TW": "BELL Explain · 筆記《{title}》", "en": "BELL Explain · note “{title}”" },
+      "sourceSelection": { "zh-TW": "BELL Explain · 筆記《{title}》 · 選取文字", "en": "BELL Explain · note “{title}” · selection" },
+      "prefillReviewTitle": { "zh-TW": "複習《{title}》", "en": "Review “{title}”" },
+      "prefillNoteTitle": { "zh-TW": "跟進學習筆記《{title}》", "en": "Follow up on “{title}”" }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "zh-TW": {
+    "termTriggerAria": "查看「{term}」的解釋",
+    "toolbarLabel": "選取文字",
+    "explain": "解釋",
+    "explainTitle": "解釋（E／Alt+Enter）",
+    "sendToPersonal": "送到 Personal",
+    "sendToPersonalTitle": "送到 Personal（Shift+S）",
+    "sendToPersonalUnlinkedTitle": "尚未連結 BELL Personal",
+    "copy": "複製",
+    "copied": "已複製",
+    "copyFailed": "無法複製",
+    "closeToolbarAria": "關閉反白工具列"
+  },
+  "en": {
+    "termTriggerAria": "View explanation for “{term}”",
+    "toolbarLabel": "Text selection",
+    "explain": "Explain",
+    "explainTitle": "Explain (E / Alt+Enter)",
+    "sendToPersonal": "Send to Personal",
+    "sendToPersonalTitle": "Send to Personal (Shift+S)",
+    "sendToPersonalUnlinkedTitle": "BELL Personal not linked",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFailed": "Couldn't copy",
+    "closeToolbarAria": "Close selection toolbar"
+  }
+}

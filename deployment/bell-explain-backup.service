@@ -1,0 +1,12 @@
+[Unit]
+Description=BELL Explain online data snapshot
+
+[Service]
+Type=oneshot
+UMask=0077
+Nice=10
+IOSchedulingClass=idle
+# Copies the databases through the SQLite backup API while BELL keeps running,
+# then keeps the newest automatic snapshot per day (7) and per week (4).
+ExecStart=/usr/bin/python3 %h/apps/bell-explain/bin/migrate-data.py snapshot %h/apps/bell-explain/data --online --into %h/apps/bell-explain/backups
+ExecStart=/usr/bin/python3 %h/apps/bell-explain/bin/migrate-data.py prune %h/apps/bell-explain/backups --keep-daily 7 --keep-weekly 4

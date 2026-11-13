@@ -1,0 +1,54 @@
+{
+  "zh-TW": {
+    "explainApiErrors": {
+      "serviceUnavailable": "服務暫時無法回應，請稍後再試。",
+      "sourceCheckFailed": "無法確認原始檔案，請稍後重試。",
+      "unusedUploadRemoveFailed": "無法移除尚未使用的檔案。",
+      "sourceMissingOnServer": "這台伺服器沒有原始檔案，仍可閱讀筆記中的擷取內容。",
+      "deleteNoteFailed": "無法刪除筆記，請稍後再試。",
+      "jobStatusUnavailable": "暫時無法確認工作狀態。",
+      "cancelJobFailed": "無法取消這次工作，請稍後再試。",
+      "selfCheckInterrupted": "批改連線中斷，尚未確認結果。請再試一次。",
+      "selfCheckStartFailed": "無法開始批改，請稍後再試。",
+      "jobOutcomeUnknown": "無法確認這次工作的結果（伺服器可能已重新啟動）。請到知識庫查看是否已儲存，或重新開始。",
+      "explainStartFailed": "無法開始解說，請稍後再試。",
+      "connectionInterruptedRetry": "連線暫時中斷。",
+      "connectionLostShort": "連線中斷。",
+      "explainStartUncertain": "連線中斷，無法確認這次解說是否已開始。請重新整理頁面查看。",
+      "jobStatusLostReload": "連線中斷，暫時無法確認這次工作的狀態。請重新整理頁面查看。",
+      "streamBodyUnsupported": "瀏覽器無法讀取生成進度。",
+      "generationInterrupted": "生成連線中斷，尚未完成筆記。請重新嘗試。"
+    },
+    "explainMathFallback": {
+      "katexRetryingTitle": "公式排版元件沒有載入，稍後會自動重試，也可以重新整理頁面",
+      "katexReloadTitle": "公式排版元件沒有載入，請重新整理頁面",
+      "invalidLatexTitle": "這段 LaTeX 無法排版，顯示原文"
+    }
+  },
+  "en": {
+    "explainApiErrors": {
+      "serviceUnavailable": "The service isn't responding right now. Please try again in a moment.",
+      "sourceCheckFailed": "Couldn't check the original file. Please try again in a moment.",
+      "unusedUploadRemoveFailed": "Couldn't remove the unused file.",
+      "sourceMissingOnServer": "The original file isn't on this server. You can still read the extracted text in this note.",
+      "deleteNoteFailed": "Couldn't delete this note. Please try again in a moment.",
+      "jobStatusUnavailable": "Couldn't check the status right now.",
+      "cancelJobFailed": "Couldn't cancel this right now. Please try again in a moment.",
+      "selfCheckInterrupted": "Connection lost while checking your answer, before the result was confirmed. Please try again.",
+      "selfCheckStartFailed": "Couldn't start checking your answer. Please try again in a moment.",
+      "jobOutcomeUnknown": "Couldn't confirm the result (the server may have restarted). Check Library to see if it saved, or start over.",
+      "explainStartFailed": "Couldn't start the explanation. Please try again in a moment.",
+      "connectionInterruptedRetry": "Connection temporarily interrupted.",
+      "connectionLostShort": "Connection lost.",
+      "explainStartUncertain": "Connection lost before we could confirm the explanation started. Please reload the page to check.",
+      "jobStatusLostReload": "Connection lost, so we can't check the status right now. Please reload the page to check.",
+      "streamBodyUnsupported": "This browser can't read live progress updates.",
+      "generationInterrupted": "Connection lost before the note was finished. Please try again."
+    },
+    "explainMathFallback": {
+      "katexRetryingTitle": "Formula formatting didn't load. It will retry shortly, or you can reload the page.",
+      "katexReloadTitle": "Formula formatting didn't load. Please reload the page.",
+      "invalidLatexTitle": "Couldn't format this LaTeX. Showing the original text."
+    }
+  }
+}
