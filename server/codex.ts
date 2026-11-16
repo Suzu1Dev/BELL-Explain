@@ -1,7 +1,8 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
+import { realpathSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { homedir, tmpdir } from 'node:os';
+import { basename, dirname, join, resolve } from 'node:path';
 import type { ProviderInfo, ProviderModel, ProviderSettings, ModelSpeedOption } from '../shared/settings.js';
 import { usageOf, type ChatCall, type ChatProgress, type ChatUsage } from './ai.js';
 import { AppError } from './errors.js';
@@ -10,6 +11,7 @@ import { cliBoundary } from './prompts/boundary.js';
 interface RpcNotification { method:string; params?:Record<string,unknown>; }
 export interface CodexRpc {
   cwd:string;
+  codexHome?:string;
   request<T=unknown>(method:string, params:unknown):Promise<T>;
   subscribe(listener:(event:RpcNotification)=>void, onError:(error:Error)=>void):()=>void;
   close():Promise<void>;
@@ -45,6 +47,18 @@ export const codexArguments = [
   ...disabledFeatures.flatMap(feature=>['-c',`features.${feature}=false`]),
 ];
 
+const GLOBAL_INSTRUCTION_FILES = new Set(['AGENTS.md','AGENTS.override.md']);
+const defaultCodexHome = (env:NodeJS.ProcessEnv=process.env)=>env.CODEX_HOME?.trim() || join(homedir(),'.codex');
+function canonicalDir(dir:string):string {
+  try { return realpathSync(dir); } catch { return resolve(dir); }
+}
+export function hasUnexpectedInstructionSources(sources:readonly string[]|undefined, codexHome?:string):boolean {
+  if(!sources?.length)return false;
+  if(!codexHome)return true;
+  const expectedDir=canonicalDir(codexHome);
+  return sources.some(source=>!GLOBAL_INSTRUCTION_FILES.has(basename(source)) || canonicalDir(dirname(source))!==expectedDir);
+}
+
 class StdioRpc implements CodexRpc {
   private id=0;
   private buffer='';
@@ -53,7 +67,7 @@ class StdioRpc implements CodexRpc {
   private pending=new Map<number,{resolve:(value:unknown)=>void;reject:(error:Error)=>void;timer:NodeJS.Timeout}>();
   private listeners=new Set<{event:(event:RpcNotification)=>void; error:(error:Error)=>void}>();
   private readonly abort:()=>void;
-  constructor(private child:ChildProcessWithoutNullStreams, public cwd:string, private signal:AbortSignal) {
+  constructor(private child:ChildProcessWithoutNullStreams, public cwd:string, private signal:AbortSignal, public codexHome?:string) {
     this.abort=()=>this.fail(signal.reason instanceof Error ? signal.reason : new DOMException('Cancelled','AbortError'));
     signal.addEventListener('abort',this.abort,{once:true});
     child.stdout.setEncoding('utf8');
@@ -135,7 +149,7 @@ export function codexRpcFactory(path=process.env.CODEX_CLI_PATH || 'codex'):Code
     signal.throwIfAborted();
     const cwd=await mkdtemp(join(tmpdir(),'bell-codex-'));
     const child=spawn(path,codexArguments,{cwd,stdio:['pipe','pipe','pipe'],shell:false});
-    const rpc=new StdioRpc(child,cwd,signal);
+    const rpc=new StdioRpc(child,cwd,signal,defaultCodexHome());
     try{
       await rpc.request('initialize',{clientInfo:{name:'bell_explain',title:'BELL Explain',version:'0.2.0'},capabilities:{experimentalApi:true}});
       child.stdin.write(JSON.stringify({jsonrpc:'2.0',method:'initialized'})+'\n');
@@ -246,7 +260,8 @@ export function createCodexChat(settings:ProviderSettings,model:ProviderModel,fa
         baseInstructions:cliBoundary,developerInstructions:`代理角色：${role}\n${instruction}`,config,
         serviceTier:speed.serviceTier,allowProviderModelFallback:false,
       });
-      if(thread.model!==model.id || thread.serviceTier!==speed.serviceTier || (thread.reasoningEffort && thread.reasoningEffort!==effort) || thread.sandbox.type!=='readOnly' || thread.sandbox.networkAccess===true || thread.instructionSources?.length)throw new AppError(502,'Codex 未套用指定模型或隔離設定，教學工作已停止。');
+      const tierMatches=thread.serviceTier===speed.serviceTier || (speed.serviceTier==='default' && thread.serviceTier===null);
+      if(thread.model!==model.id || !tierMatches || (thread.reasoningEffort && thread.reasoningEffort!==effort) || thread.sandbox.type!=='readOnly' || thread.sandbox.networkAccess===true || hasUnexpectedInstructionSources(thread.instructionSources,client.codexHome ?? defaultCodexHome()))throw new AppError(502,'Codex 未套用指定模型或隔離設定，教學工作已停止。');
       const messages=new Map<string,string>();
       let rejectCompletion:(error:Error)=>void=()=>{};
       const completion=new Promise<unknown>((resolve,reject)=>{

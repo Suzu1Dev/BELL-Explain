@@ -5,7 +5,7 @@ import { AppError } from './errors.js';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { createCodexChat, discoverCodex, normalizeCodexModel, codexArguments, codexRpcFactory, type CodexRpc } from './codex.js';
+import { createCodexChat, discoverCodex, normalizeCodexModel, codexArguments, codexRpcFactory, hasUnexpectedInstructionSources, type CodexRpc } from './codex.js';
 import { ProviderSettingsStore } from './provider-settings.js';
 import { ProviderService } from './provider-router.js';
 import type { ProviderInfo, ProviderSettings } from '../shared/settings.js';
@@ -259,4 +259,24 @@ test('Codex provider model reroute is rejected rather than silently changing the
   const rejected=assert.rejects(pending,/改用其他模型/);
   await advanceMicrotasks();rpc.listener?.({method:'model/rerouted',params:{threadId:'thread-1',toModel:'different-model'}});
   await rejected;assert.equal(rpc.closeCount,1);
+});
+test('Codex allows global CODEX_HOME AGENTS.md while rejecting non-global instruction sources',async()=>{
+  assert.equal(hasUnexpectedInstructionSources(['/Users/demo/.codex/AGENTS.md','/Users/demo/.codex/AGENTS.override.md'],'/Users/demo/.codex'),false);
+  assert.equal(hasUnexpectedInstructionSources(['/tmp/bell-empty-test/AGENTS.md'],'/Users/demo/.codex'),true);
+  const okRpc=Object.assign(new FakeRpc(),{codexHome:'/Users/demo/.codex'});
+  const base=okRpc.request.bind(okRpc);
+  okRpc.request=async<T>(method:string,params:unknown)=>{
+    const res=await base<T>(method,params);
+    if(method==='thread/start')return {...(res as object),instructionSources:['/Users/demo/.codex/AGENTS.md']} as T;
+    return res;
+  };
+  assert.deepEqual(await createCodexChat(settings,model,async()=>okRpc)('Teacher','Return JSON',{},new AbortController().signal),{ok:true});
+
+  const badRpc=Object.assign(new FakeRpc(),{codexHome:'/Users/demo/.codex'});
+  badRpc.request=async<T>(method:string,params:unknown)=>{
+    const res=await base<T>(method,params);
+    if(method==='thread/start')return {...(res as object),instructionSources:['/tmp/bell-empty-test/AGENTS.md']} as T;
+    return res;
+  };
+  await assert.rejects(()=>createCodexChat(settings,model,async()=>badRpc)('Teacher','Return JSON',{},new AbortController().signal),/未套用指定模型或隔離設定/);
 });
